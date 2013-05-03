@@ -17,6 +17,7 @@ import com.anjelin.util.StackTraceUtil;
 import com.digitalpersona.onetouch.DPFPFingerIndex;
 import com.digitalpersona.onetouch.DPFPGlobal;
 import com.digitalpersona.onetouch.DPFPTemplate;
+import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -25,9 +26,12 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -53,7 +57,8 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private JLabel direccionLabel = new JLabel("Dirección :");
     private JTextField direccionCampo = new JTextField();
     private JLabel salarioLabel = new JLabel("Salario :");
-    private JTextField salarioCampo = new JTextField();
+    private JTextField salarioCampo = new JTextField();    
+    private JCheckBox estadoCampo = new JCheckBox("Activo? ", false);
     private JButton botonNuevo = new JButton("Nuevo");
     private JButton botonModificar = new JButton("Modificar");
     private JButton botonEliminar = new JButton("Eliminar");
@@ -66,6 +71,9 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private final static int COMANDO_ELIMINAR = 3;
     private final static int COMANDO_GUARDAR = 4;
     private final static int COMANDO_CANCELAR = 5;
+    private final static int tamano_imagen_width   = 40;
+    private final static int tamano_imagen_height   = 40;
+    
 
 
 
@@ -74,10 +82,11 @@ public class PersonaJFrame extends javax.swing.JFrame {
      */
     public PersonaJFrame() {
         initComponents();
-        setState(Frame.NORMAL);
         PersonaTableModel modelo = new PersonaTableModel();
         personasjTable.setModel(modelo);
         crearTabsPersona();
+        activarCampos(false);
+        pack();
     }
 
     /**
@@ -212,23 +221,35 @@ public class PersonaJFrame extends javax.swing.JFrame {
             jPanel1.add(direccionLabel);
             jPanel1.add(direccionCampo);
             jPanel1.add(salarioLabel);
-            jPanel1.add(salarioCampo);            
-
-            jPanel1.add(enrrolarButton);
+            jPanel1.add(salarioCampo);             
+            jPanel1.add(estadoCampo);
+            jPanel1.add(new JLabel());
+            
+            JPanel botonera = new JPanel(new GridLayout(0, 6, 5, 5));
+            
             enrrolarButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) { 
                     new EnrollmentDialog(PersonaJFrame.this, 2, null, templates).setVisible(true);
                 }
 
-            });
+            });            
+            botonera.add(botonNuevo);            
+            botonera.add(botonModificar);            
+            botonera.add(botonEliminar);            
+            botonera.add(botonGuardar);
+            botonera.add(enrrolarButton);
+            botonera.add(botonCancelar); 
+            
+            //Iconos
+            enrrolarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/finger.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
+            botonCancelar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/cancel.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
+            botonNuevo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/new.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
+            botonModificar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
+            botonEliminar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
+            botonGuardar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/save.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
             
             
             
-            jPanel1.add(botonCancelar); 
-            jPanel1.add(botonNuevo);            
-            jPanel1.add(botonModificar);            
-            jPanel1.add(botonEliminar);            
-            jPanel1.add(botonGuardar); 
             botonCancelar.setVisible(false);
             botonNuevo.setEnabled(true);
             botonModificar.setEnabled(false);
@@ -250,7 +271,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                     PersonaDelegate personaDelegate = null;
                     switch(comando){
                         case COMANDO_NUEVO:
-                            
+                            activarCampos(true);
                             setPersonaSeleccionada(new Persona());
                             cargarDatosPersonaSeleccionada();
                             botonCancelar.setVisible(true);
@@ -263,6 +284,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                             outputPersonas.append("INGRESE LOS DATOS DE LA NUEVA PERSONA Y LUEGO OPRIMA GUARDAR. DE LO CONTRARIO CANCELAR! \n");
                             break;
                         case COMANDO_CANCELAR:
+                            activarCampos(false);
                             setPersonaSeleccionada(new Persona());
                             cargarDatosPersonaSeleccionada();                            
                             botonCancelar.setVisible(false);
@@ -308,6 +330,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                                 botonEliminar.setEnabled(false);
                                 botonGuardar.setEnabled(false);                           
                                 personasjTable.setEnabled(true);
+                                activarCampos(false);
                                 
                                 
                             } catch (Exception e) {
@@ -365,6 +388,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                                 botonEliminar.setEnabled(false);
                                 botonGuardar.setEnabled(false);                           
                                 personasjTable.setEnabled(true);
+                                activarCampos(false);
                                 
                             } catch (Exception e) {
                                 if (personaDelegate != null && AbstractFacade.EM.getTransaction().isActive()) {
@@ -396,6 +420,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                                    botonEliminar.setEnabled(false);
                                    botonGuardar.setEnabled(false);
                                    personasjTable.setEnabled(true);
+                                   activarCampos(false);
 
                                }
 
@@ -429,7 +454,11 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonCancelar.addActionListener(actionListenerBotones);
                     
             
-            personasTab.addTab("Datos Generales Persona", jPanel1);
+            JPanel tabDatos = new JPanel(new BorderLayout());
+            tabDatos.add(jPanel1, BorderLayout.CENTER);
+            tabDatos.add(botonera, BorderLayout.SOUTH);
+            
+            personasTab.addTab("Datos Generales Persona", tabDatos);
             cargarDatosPersonaSeleccionada();   
     
         } catch (Exception e) {
@@ -450,6 +479,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
         telefonoCampo.setText(getPersonaSeleccionada().getTelefono());
         direccionCampo.setText(getPersonaSeleccionada().getDireccion());
         salarioCampo.setText(String.valueOf(getPersonaSeleccionada().getSalario()));
+        estadoCampo.setSelected(getPersonaSeleccionada().getEstado());
 
 
         this.templates.clear();
@@ -478,7 +508,19 @@ public class PersonaJFrame extends javax.swing.JFrame {
         } catch (Exception e) {
            getPersonaSeleccionada().setSalario(0);
         }
+        getPersonaSeleccionada().setEstado(estadoCampo.isSelected());
         return getPersonaSeleccionada();
+    }
+
+    private void activarCampos(boolean activar) {
+        idCampo.setEnabled(activar);
+        numeroIdCampo.setEnabled(activar);
+        nombresCampo.setEnabled(activar);
+        apellidosCampo.setEnabled(activar);
+        telefonoCampo.setEnabled(activar);
+        direccionCampo.setEnabled(activar);
+        salarioCampo.setEnabled(activar);
+        estadoCampo.setEnabled(activar);
     }
 
 
@@ -495,6 +537,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonEliminar.setEnabled(true);
             botonGuardar.setEnabled(false);
             seleccionarPersona();
+            activarCampos(true);
         }
     }
     
