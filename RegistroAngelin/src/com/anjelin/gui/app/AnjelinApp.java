@@ -4,10 +4,6 @@
  */
 package com.anjelin.gui.app;
 
-import com.digitalpersona.onetouch.DPFPFingerIndex;
-import java.util.EnumMap;
-import java.util.Map;
-
 /**
  *
  * @author Admon
@@ -15,38 +11,16 @@ import java.util.Map;
 public class AnjelinApp extends javax.swing.JFrame {
     
     private PersonaJFrame framePersona = null;
+    private RelojPanel reloj=new RelojPanel();
+
 
     /**
      * Creates new form AnjelinApp
      */
     public AnjelinApp() {
-        initComponents();
-        
-        try {
-          EnumMap<DPFPFingerIndex, String> fingerNames;
-        
-        	fingerNames = new EnumMap<DPFPFingerIndex, String>(DPFPFingerIndex.class);
-        	fingerNames.put(DPFPFingerIndex.LEFT_PINKY,	  "left pinky");
-        	fingerNames.put(DPFPFingerIndex.LEFT_RING,    "left ring");
-        	fingerNames.put(DPFPFingerIndex.LEFT_MIDDLE,  "left middle");
-        	fingerNames.put(DPFPFingerIndex.LEFT_INDEX,   "left index");
-        	fingerNames.put(DPFPFingerIndex.LEFT_THUMB,   "left thumb");
-        	fingerNames.put(DPFPFingerIndex.RIGHT_PINKY,  "right pinky");
-        	fingerNames.put(DPFPFingerIndex.RIGHT_RING,   "right ring");
-        	fingerNames.put(DPFPFingerIndex.RIGHT_MIDDLE, "right middle");
-        	fingerNames.put(DPFPFingerIndex.RIGHT_INDEX,  "right index");
-        	fingerNames.put(DPFPFingerIndex.RIGHT_THUMB,  "right thumb");
-                
-                for (Map.Entry<DPFPFingerIndex, String> entry : fingerNames.entrySet()) {
-                DPFPFingerIndex dPFPFingerIndex = entry.getKey();
-                String string = entry.getValue();
-                System.out.println(dPFPFingerIndex.toBit() + "|" + dPFPFingerIndex.toString());
-                
-            }
-        
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        initComponents(); 
+        add(reloj);
+        pack();
     }
 
     /**
@@ -113,17 +87,6 @@ public class AnjelinApp extends javax.swing.JFrame {
 
         setJMenuBar(menuBar);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 279, Short.MAX_VALUE)
-        );
-
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -188,4 +151,6 @@ public class AnjelinApp extends javax.swing.JFrame {
     private javax.swing.JMenu helpMenu;
     private javax.swing.JMenuBar menuBar;
     // End of variables declaration//GEN-END:variables
+
+
 }
