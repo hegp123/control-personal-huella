@@ -4,6 +4,7 @@
  */
 package com.anjelin.gui.app;
 
+import com.anjelin.modelo.TipoRegistroEnum;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -31,20 +32,33 @@ public class RelojPanel extends JPanel implements ActionListener {
     private JLabel fechaLabel = new JLabel();
     private JButton registroEntrada = new JButton();
     private JButton registroSalida = new JButton();
+    public static final int ENTRADA=1;
+    public static final int SALIDA=2;
 
     public RelojPanel() {
 
         setLayout(new GridLayout(0, 1));
         add(fechaLabel);        
         JPanel botonesRegistro = new JPanel(new GridLayout(0, 2, 10,10));
-        registroEntrada.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/entrada.png")));
-        registroSalida.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/salida.png")));      
+        registroEntrada.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/entrada.png")).getImage().getScaledInstance( 100, 100,  java.awt.Image.SCALE_SMOOTH )));
+        registroSalida.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/salida.png")).getImage().getScaledInstance( 100, 100,  java.awt.Image.SCALE_SMOOTH )));
         botonesRegistro.add(registroEntrada);
         botonesRegistro.add(registroSalida);
         add(botonesRegistro);
         add(horaLabel);
         
-        horaLabel.setSize(100, 50);
+        registroEntrada.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                registroPersona(TipoRegistroEnum.ENTRADA);
+            }
+        });
+        registroSalida.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                registroPersona(TipoRegistroEnum.SALIDA);
+            }
+        });        
         
         
         inicializarHora();
@@ -152,5 +166,10 @@ public class RelojPanel extends JPanel implements ActionListener {
 
     }
     
- 
+    private void registroPersona(TipoRegistroEnum tipoRegistro) {
+       
+        CaptureForm form = new CaptureForm(null, tipoRegistro);
+        form.setVisible(true);
+    } 
+    
 }

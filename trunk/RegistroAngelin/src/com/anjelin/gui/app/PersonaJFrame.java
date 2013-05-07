@@ -18,11 +18,10 @@ import com.digitalpersona.onetouch.DPFPFingerIndex;
 import com.digitalpersona.onetouch.DPFPGlobal;
 import com.digitalpersona.onetouch.DPFPTemplate;
 import java.awt.BorderLayout;
-import java.awt.Frame;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -71,8 +70,9 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private final static int COMANDO_ELIMINAR = 3;
     private final static int COMANDO_GUARDAR = 4;
     private final static int COMANDO_CANCELAR = 5;
-    private final static int tamano_imagen_width   = 40;
-    private final static int tamano_imagen_height   = 40;
+    private final static int TAMANO_IMAGEN_WIDTH   = 40;
+    private final static int TAMANO_IMAGEN_HEIGHT   = 40;
+    private RegistroPersonaPanel regsitroPersonaPanel = new RegistroPersonaPanel();
     
 
 
@@ -87,6 +87,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
         crearTabsPersona();
         activarCampos(false);
         pack();
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -241,12 +242,12 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonera.add(botonCancelar); 
             
             //Iconos
-            enrrolarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/finger.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
-            botonCancelar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/cancel.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
-            botonNuevo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/new.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
-            botonModificar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
-            botonEliminar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
-            botonGuardar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/save.png")).getImage().getScaledInstance( tamano_imagen_width, tamano_imagen_height,  java.awt.Image.SCALE_SMOOTH )));
+            enrrolarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/finger.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonCancelar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/cancel.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonNuevo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/new.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonModificar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonEliminar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonGuardar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/save.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
             
             
             
@@ -459,10 +460,11 @@ public class PersonaJFrame extends javax.swing.JFrame {
             tabDatos.add(botonera, BorderLayout.SOUTH);
             
             personasTab.addTab("Datos Generales Persona", tabDatos);
+            personasTab.addTab("Registros Persona", regsitroPersonaPanel);
+            
             cargarDatosPersonaSeleccionada();   
     
         } catch (Exception e) {
-            e.printStackTrace();
             outputPersonas.append(StackTraceUtil.getStackTrace(e)+"\n");
         }
 
@@ -537,6 +539,9 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonEliminar.setEnabled(true);
             botonGuardar.setEnabled(false);
             seleccionarPersona();
+            regsitroPersonaPanel.getRegistrosPersonaTableModel().cargarDatos(personaSeleccionada, 5, 2013);
+            regsitroPersonaPanel.updateUI();
+            
             activarCampos(true);
         }
     }
@@ -546,7 +551,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
         try {
             for (int c : personasjTable.getSelectedRows()) {
                 PersonaTableModel modelo = (PersonaTableModel) personasjTable.getModel();
-                setPersonaSeleccionada(modelo.getPersona(c));                
+                setPersonaSeleccionada(modelo.getPersona(c));
             }
             cargarDatosPersonaSeleccionada();
         } catch (Exception e) {

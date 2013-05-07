@@ -34,11 +34,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "RegistroPersona.findAll", query = "SELECT r FROM RegistroPersona r"),
     @NamedQuery(name = "RegistroPersona.findById", query = "SELECT r FROM RegistroPersona r WHERE r.id = :id"),
     @NamedQuery(name = "RegistroPersona.findByFecha", query = "SELECT r FROM RegistroPersona r WHERE r.fecha = :fecha"),
-    @NamedQuery(name = "RegistroPersona.findByHora", query = "SELECT r FROM RegistroPersona r WHERE r.hora = :hora"),
     @NamedQuery(name = "RegistroPersona.findByAuto", query = "SELECT r FROM RegistroPersona r WHERE r.auto = :auto"),
+    @NamedQuery(name = "RegistroPersona.findPorPersonaMesyAnno", query = "SELECT r FROM RegistroPersona r "
+        + " WHERE r.idPersona = :idPersona AND FUNC('YEAR', r.fecha) = :anno AND FUNC('MONTH', r.fecha) = :mes and r.idPersona.estado = true"),
+    @NamedQuery(name = "RegistroPersona.findByPersonaActivas", query = "SELECT r FROM RegistroPersona r "
+        + " WHERE r.idPersona = :idPersona and r.horaSalida IS NULL and r.idPersona.estado = true"),
     @NamedQuery(name = "RegistroPersona.findByContabilizado", query = "SELECT r FROM RegistroPersona r WHERE r.contabilizado = :contabilizado")})
 public class RegistroPersona implements Serializable {
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -49,21 +51,21 @@ public class RegistroPersona implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date fecha;
     @Basic(optional = false)
-    @Column(nullable = false)
+    @Column(name = "HORA_ENTRADA", nullable = false)
     @Temporal(TemporalType.TIME)
-    private Date hora;
+    private Date horaEntrada;
+    @Column(name = "HORA_SALIDA")
+    @Temporal(TemporalType.TIME)
+    private Date horaSalida;
     @Basic(optional = false)
     @Column(nullable = false)
     private short auto;
-    @Basic(optional = false)
-    @Column(nullable = false)
-    private short contabilizado;
     @Lob
     @Column(length = 65535)
     private String observaciones;
-    @JoinColumn(name = "ID_TIPO_REGISTRO", referencedColumnName = "ID", nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private TipoRegistro idTipoRegistro;
+    @Basic(optional = false)
+    @Column(nullable = false)
+    private short contabilizado;
     @JoinColumn(name = "ID_PERSONA", referencedColumnName = "ID", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Persona idPersona;
@@ -75,10 +77,10 @@ public class RegistroPersona implements Serializable {
         this.id = id;
     }
 
-    public RegistroPersona(Integer id, Date fecha, Date hora, short auto, short contabilizado) {
+    public RegistroPersona(Integer id, Date fecha, Date horaEntrada, short auto, short contabilizado) {
         this.id = id;
         this.fecha = fecha;
-        this.hora = hora;
+        this.horaEntrada = horaEntrada;
         this.auto = auto;
         this.contabilizado = contabilizado;
     }
@@ -99,12 +101,20 @@ public class RegistroPersona implements Serializable {
         this.fecha = fecha;
     }
 
-    public Date getHora() {
-        return hora;
+    public Date getHoraEntrada() {
+        return horaEntrada;
     }
 
-    public void setHora(Date hora) {
-        this.hora = hora;
+    public void setHoraEntrada(Date horaEntrada) {
+        this.horaEntrada = horaEntrada;
+    }
+
+    public Date getHoraSalida() {
+        return horaSalida;
+    }
+
+    public void setHoraSalida(Date horaSalida) {
+        this.horaSalida = horaSalida;
     }
 
     public short getAuto() {
@@ -115,14 +125,6 @@ public class RegistroPersona implements Serializable {
         this.auto = auto;
     }
 
-    public short getContabilizado() {
-        return contabilizado;
-    }
-
-    public void setContabilizado(short contabilizado) {
-        this.contabilizado = contabilizado;
-    }
-
     public String getObservaciones() {
         return observaciones;
     }
@@ -131,12 +133,12 @@ public class RegistroPersona implements Serializable {
         this.observaciones = observaciones;
     }
 
-    public TipoRegistro getIdTipoRegistro() {
-        return idTipoRegistro;
+    public short getContabilizado() {
+        return contabilizado;
     }
 
-    public void setIdTipoRegistro(TipoRegistro idTipoRegistro) {
-        this.idTipoRegistro = idTipoRegistro;
+    public void setContabilizado(short contabilizado) {
+        this.contabilizado = contabilizado;
     }
 
     public Persona getIdPersona() {
@@ -171,5 +173,5 @@ public class RegistroPersona implements Serializable {
     public String toString() {
         return "com.anjelin.modelo.RegistroPersona[ id=" + id + " ]";
     }
-    
+   
 }

@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "PersonaHuella.findAll", query = "SELECT p FROM PersonaHuella p"),
+    @NamedQuery(name = "PersonaHuella.findAllPersonasActivas", query = "SELECT p FROM PersonaHuella p WHERE p.persona.estado = true"),
     @NamedQuery(name = "PersonaHuella.findByIdPersona", query = "SELECT p FROM PersonaHuella p WHERE p.personaHuellaPK.idPersona = :idPersona"),
     @NamedQuery(name = "PersonaHuella.findByFingerIndex", query = "SELECT p FROM PersonaHuella p WHERE p.personaHuellaPK.fingerIndex = :fingerIndex")})
 public class PersonaHuella implements Serializable {

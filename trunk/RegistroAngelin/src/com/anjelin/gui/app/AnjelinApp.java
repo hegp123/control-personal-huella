@@ -21,6 +21,7 @@ public class AnjelinApp extends javax.swing.JFrame {
         initComponents(); 
         add(reloj);
         pack();
+        setLocationRelativeTo(null);
     }
 
     /**
