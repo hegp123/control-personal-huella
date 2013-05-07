@@ -8,6 +8,7 @@ import com.anjelin.dal.AbstractFacade;
 import com.anjelin.dal.persona.PersonaDelegate;
 import com.anjelin.dal.persona.PersonaHuellaDelegate;
 import com.anjelin.gui.table.model.PersonaTableModel;
+import com.anjelin.gui.table.model.RegistrosPersonaTableModel;
 import com.anjelin.modelo.Persona;
 import com.anjelin.modelo.PersonaHuella;
 import com.anjelin.modelo.PersonaHuellaPK;
@@ -539,9 +540,10 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonEliminar.setEnabled(true);
             botonGuardar.setEnabled(false);
             seleccionarPersona();
-            regsitroPersonaPanel.getRegistrosPersonaTableModel().cargarDatos(personaSeleccionada, 5, 2013);
+            RegistrosPersonaTableModel registrosPersonaTableModel = regsitroPersonaPanel.getRegistrosPersonaTableModel();
+            registrosPersonaTableModel.cargarDatos(personaSeleccionada, 5, 2013);
+            regsitroPersonaPanel.getTablaRegistrosPersona().setModel(registrosPersonaTableModel);
             regsitroPersonaPanel.updateUI();
-            
             activarCampos(true);
         }
     }
