@@ -10,7 +10,6 @@ package com.anjelin.gui.app;
  */
 public class AnjelinApp extends javax.swing.JFrame {
     
-    private PersonaJFrame framePersona = null;
     private RelojPanel reloj=new RelojPanel();
 
 
@@ -97,14 +96,8 @@ public class AnjelinApp extends javax.swing.JFrame {
 
     private void cutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cutMenuItemActionPerformed
         
-        if(framePersona != null && framePersona.isVisible()){
-            System.out.println("Esta visible...........");
-            return;
-        }else{
-            framePersona = new PersonaJFrame();
-            framePersona.setVisible(true);
-        }
-        
+        PasswordInputDialog pass = new PasswordInputDialog();
+        pass.setVisible(true);
         
     }//GEN-LAST:event_cutMenuItemActionPerformed
 

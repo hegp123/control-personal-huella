@@ -540,6 +540,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonEliminar.setEnabled(true);
             botonGuardar.setEnabled(false);
             seleccionarPersona();
+            regsitroPersonaPanel.getTablaRegistrosPersona().removeAll();
             RegistrosPersonaTableModel registrosPersonaTableModel = regsitroPersonaPanel.getRegistrosPersonaTableModel();
             registrosPersonaTableModel.cargarDatos(personaSeleccionada, 5, 2013);
             regsitroPersonaPanel.getTablaRegistrosPersona().setModel(registrosPersonaTableModel);

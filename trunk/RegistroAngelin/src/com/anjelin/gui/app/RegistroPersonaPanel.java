@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 
 /**
  *
@@ -63,24 +64,34 @@ class RegistroPersonaPanel extends JPanel {
         cons_fechaInicial.weightx=1;
         fechaInicial.setDate(_fechaInicio);
         System.out.println("Fecha Inicio: "+_fechaInicio);
-        //add(fechaInicial, cons_fechaInicial);
-        add(new JButton("1"), cons_fechaInicial);
+        cons_fechaInicial.fill = GridBagConstraints.BOTH;
+        add(fechaInicial, cons_fechaInicial);
+        
+        //add(new JTextField(), cons_fechaInicial);
+        
+        //add(new JButton("1"), cons_fechaInicial);
 
         GridBagConstraints cons_fechaFinal = new GridBagConstraints();
         cons_fechaFinal.gridx = 1; 
         cons_fechaFinal.gridy = 0; 
         cons_fechaFinal.gridwidth = 1; 
         cons_fechaFinal.gridheight = 1;
+        cons_fechaFinal.weightx=1;
         fechaFinal.setDate(_fechaFin);
-        System.out.println("Fecha Fin: "+_fechaFin);
-        //add(fechaInicial, cons_fechaFinal);        
-        add(new JButton("2"), cons_fechaFinal);
+        System.out.println("Fecha Fin: "+_fechaFin);        
+        cons_fechaFinal.fill = GridBagConstraints.BOTH;
+        add(fechaFinal, cons_fechaFinal); 
+        //add(new JTextField(), cons_fechaFinal);    
+        
+        //add(new JButton("2"), cons_fechaFinal);
 
         GridBagConstraints cons_botonBuscar = new GridBagConstraints();
         cons_botonBuscar.gridx = 2; 
         cons_botonBuscar.gridy = 0; 
         cons_botonBuscar.gridwidth = 1; 
         cons_botonBuscar.gridheight = 1;
+        cons_botonBuscar.weightx=1;
+        cons_botonBuscar.fill = GridBagConstraints.BOTH;
         add(buscar, cons_botonBuscar);  
         //add(new JButton("3"), cons_botonBuscar);
 
@@ -98,6 +109,7 @@ class RegistroPersonaPanel extends JPanel {
         cons_tablaRegistros.gridwidth = 3; 
         cons_tablaRegistros.gridheight = 2;
         cons_tablaRegistros.weighty = 1.0; // La fila 1 debe estirarse, le ponemos un 1.0
+        cons_tablaRegistros.weightx=1.0;
         cons_tablaRegistros.fill = GridBagConstraints.BOTH;
         cons_tablaRegistros.anchor= GridBagConstraints.FIRST_LINE_START;
         jScrollPanelTabla.setViewportView(tablaRegistrosPersona);
