@@ -9,6 +9,7 @@ import com.anjelin.modelo.Persona;
 import com.anjelin.modelo.RegistroPersona;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
@@ -28,23 +29,18 @@ public class RegistrosPersonaTableModel extends AbstractTableModel {
     
     private List<RegistroPersona> registros = new ArrayList<RegistroPersona>();
     private Persona persona;
-    private int mes;
-    private int anno;
 
-    public RegistrosPersonaTableModel(Persona persona, int mes, int anno) {
+    public RegistrosPersonaTableModel(Persona persona) {
         this.persona=persona;
-        this.mes=mes;
-        this.anno=anno;
-        cargarDatos(persona, mes, anno);
     }
 
     public RegistrosPersonaTableModel() {
         
     }
     
-    public void cargarDatos(Persona persona, int mes, int anno) {
+    public void cargarRegistrosPersonaPorRango(Persona persona, Date fechaInicio, Date fechaFin) {
         PersonaRegistrosDelegate registrosDelegate = new PersonaRegistrosDelegate();
-        this.registros = registrosDelegate.registrosPersonaPorMesyAno(persona, mes, anno);
+        this.registros = registrosDelegate.registrosPersonaPorRangoFechas(persona, fechaInicio, fechaFin);
     }
        
 
@@ -87,7 +83,7 @@ public class RegistrosPersonaTableModel extends AbstractTableModel {
         }
     }
     
-    public RegistroPersona getPersona (int rowIndex){
+    public RegistroPersona getRegistroPersona (int rowIndex){
         return this.registros.get(rowIndex);
     }
 
@@ -125,22 +121,5 @@ public class RegistrosPersonaTableModel extends AbstractTableModel {
 
     public void setPersona(Persona persona) {
         this.persona = persona;
-    }
-
-    public int getMes() {
-        return mes;
-    }
-
-    public void setMes(int mes) {
-        this.mes = mes;
-    }
-
-    public int getAnno() {
-        return anno;
-    }
-
-    public void setAnno(int anno) {
-        this.anno = anno;
-    }
-    
+    }    
 }
