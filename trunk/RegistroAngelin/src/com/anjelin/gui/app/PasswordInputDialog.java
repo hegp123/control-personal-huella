@@ -72,16 +72,15 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
  
-        if (OK.equals(cmd)) { //Process the password.
+        if (OK.equals(cmd)) { //Process the password.           
             char[] input = passwordField.getPassword();
             if (isPasswordCorrect(input)) {
                 add(new JLabel("<html><b>Cargando datos....</b></html>"));
                 validate();
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
-                    public void run() {                        
-                        PersonaJFrame framePersona = new PersonaJFrame();
-                        framePersona.setVisible(true);
+                    public void run() { 
+                        PersonaJFrame.getInstance().setVisible(true);
                         PasswordInputDialog.this.dispose();
                     }
                 });

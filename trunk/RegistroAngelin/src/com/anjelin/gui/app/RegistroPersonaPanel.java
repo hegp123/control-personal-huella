@@ -4,10 +4,13 @@
  */
 package com.anjelin.gui.app;
 
+import com.anjelin.constantes.Constantes;
+import com.anjelin.dal.persona.PersonaRegistrosDelegate;
 import com.anjelin.gui.table.model.RegistrosPersonaTableModel;
 import com.anjelin.modelo.Persona;
 import com.anjelin.modelo.RegistroPersona;
 import com.anjelin.util.DateUtils;
+import com.anjelin.util.StackTraceUtil;
 import com.toedter.calendar.JDateChooser;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -46,9 +49,6 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
     private JButton modificarButton = new JButton("modificar");
     private Date fechaInicio;
     private Date fechaFin;
-    private static final int COMANDO_BUSCAR = 1;
-    private static final int COMANDO_ELIMINAR = 2 ;
-    private static final int COMANDO_MODIFICAR = 3;
     private Persona personaSeleccionada;
     private RegistroPersona registroPersonaSeleccionado;
     
@@ -140,9 +140,9 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
         //setBorder(BorderFactory.createLineBorder(Color.black));
         
         //Comando
-        buscar.setActionCommand(String.valueOf(COMANDO_BUSCAR));
-        eliminarButton.setActionCommand(String.valueOf(COMANDO_ELIMINAR));
-        modificarButton.setActionCommand(String.valueOf(COMANDO_MODIFICAR));
+        buscar.setActionCommand(String.valueOf(Constantes.COMANDO_BUSCAR));
+        eliminarButton.setActionCommand(String.valueOf(Constantes.COMANDO_ELIMINAR));
+        modificarButton.setActionCommand(String.valueOf(Constantes.COMANDO_MODIFICAR));
         
         //listener
         buscar.addActionListener(this);
@@ -163,7 +163,7 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
 
         Integer comando = Integer.parseInt(actionEvent.getActionCommand());
         switch (comando) {
-            case COMANDO_BUSCAR: {                
+            case Constantes.COMANDO_BUSCAR: {                
                 Date fechaI = fechaInicial.getDate();
                 Date fechaF = fechaFinal.getDate();
                 if(getPersonaSeleccionada() == null || getPersonaSeleccionada().getId() == null){
@@ -187,11 +187,23 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
                 updateUI();
                 break;
             }
-            case COMANDO_MODIFICAR: {
-
+            case Constantes.COMANDO_MODIFICAR: {
+                
+                RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true);
+                dialogo.setVisible(true);
+                
                 break;
             }
-            case COMANDO_ELIMINAR: {
+            case Constantes.COMANDO_ELIMINAR: {
+                
+                if (JOptionPane.showConfirmDialog(null, "<html>Confirma la eliminación del registro <b> ID: " + getRegistroPersonaSeleccionado().getId() + "</b> ?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
+                    try {
+                        delegate.eliminar(getRegistroPersonaSeleccionado());
+                    } catch (Exception ex) {                        
+                        JOptionPane.showMessageDialog(null, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
 
                 break;
             }

@@ -4,17 +4,23 @@
  */
 package com.anjelin.gui.app;
 
+import com.anjelin.constantes.Constantes;
+import com.anjelin.dal.persona.PersonaRegistrosDelegate;
 import com.anjelin.modelo.RegistroPersona;
+import com.anjelin.util.StackTraceUtil;
 import com.toedter.calendar.JDateChooser;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Calendar;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -22,7 +28,7 @@ import javax.swing.JTextArea;
  *
  * @author javrammo
  */
-public class RegistrosPersonaDialog extends JDialog {
+public class RegistrosPersonaDialog extends JDialog implements ActionListener{
 
     private RegistroPersona registro;
     private JDateChooser fecha = new JDateChooser();
@@ -37,6 +43,7 @@ public class RegistrosPersonaDialog extends JDialog {
     private JButton botonGuardar = new JButton("Guardar");
     private boolean edicion; //true: edicion, false: nuevo registro
     private JButton botonEliminar = new JButton("Eliminar");
+    
 
     public RegistrosPersonaDialog(RegistroPersona registro, boolean edicion) {
         this.registro = registro;
@@ -81,9 +88,15 @@ public class RegistrosPersonaDialog extends JDialog {
             JPanel botones = new JPanel();
             botones.add(botonEditar);
             botones.add(botonEliminar);
+            botonEditar.setActionCommand(String.valueOf(Constantes.COMANDO_MODIFICAR));
+            botonEditar.addActionListener(this);
+            botonEliminar.setActionCommand(String.valueOf(Constantes.COMANDO_ELIMINAR));
+            botonEliminar.addActionListener(this);
             getContentPane().add(botones, BorderLayout.SOUTH);
         } else {
             getContentPane().add(botonGuardar, BorderLayout.SOUTH);
+            botonGuardar.setActionCommand(String.valueOf(Constantes.COMANDO_GUARDAR));
+            botonGuardar.addActionListener(this);
         }
         
         if(this.registro != null){
@@ -142,4 +155,47 @@ public class RegistrosPersonaDialog extends JDialog {
         
         observaciones.setText(registro.getObservaciones());
     }
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        
+        Integer comando = Integer.parseInt(actionEvent.getActionCommand());
+        switch (comando) {
+            case Constantes.COMANDO_MODIFICAR: {
+                
+                RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistro(), true);
+                dialogo.setVisible(true);
+                
+                break;
+            }
+            case Constantes.COMANDO_ELIMINAR: {
+                
+                if (JOptionPane.showConfirmDialog(null, "<html>Confirma la eliminación del registro <b> ID: " + getRegistro().getId() + "</b> ?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
+                    try {
+                        delegate.eliminar(getRegistro());
+                    } catch (Exception ex) {                        
+                        JOptionPane.showMessageDialog(null, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+                break;
+            }
+            case Constantes.COMANDO_GUARDAR: {
+                
+                break;
+            }                
+        }
+    }
+
+    public RegistroPersona getRegistro() {
+        return registro;
+    }
+
+    public void setRegistro(RegistroPersona registro) {
+        this.registro = registro;
+    }
+    
+    
+    
 }

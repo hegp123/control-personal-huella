@@ -70,7 +70,7 @@ public abstract class AbstractFacade<T> {
      *
      * @param entity
      */
-    public void eliminar(T entity) {
+    public void eliminar(T entity) throws Exception{
         EM.remove(EM.merge(entity));
     }
 

@@ -45,6 +45,8 @@ import javax.swing.event.ListSelectionListener;
  */
 public class PersonaJFrame extends javax.swing.JFrame {
 
+    private static PersonaJFrame _instance;
+    
     private Persona personaSeleccionada = null;
     private JLabel idLabel = new JLabel("Id. Persona :");
     private JLabel idCampo = new JLabel();
@@ -83,7 +85,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
     /**
      * Creates new form PersonaJFrame
      */
-    public PersonaJFrame() {
+    private PersonaJFrame() {
         initComponents();
         PersonaTableModel modelo = new PersonaTableModel();
         personasjTable.setModel(modelo);
@@ -200,6 +202,12 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private javax.swing.JTable personasjTable;
     // End of variables declaration//GEN-END:variables
 
+    public static PersonaJFrame getInstance(){        
+        if(_instance == null){
+            _instance = new PersonaJFrame();
+        }
+        return _instance;
+    }
 
     private void crearTabsPersona() {
         try {
@@ -406,7 +414,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                        case COMANDO_ELIMINAR:
                            try {
 
-                               if (JOptionPane.showConfirmDialog(null, "<html>Coinfirma la eliminación de la persona <b>" + getPersonaSeleccionada().getNombres() + "</b>?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                               if (JOptionPane.showConfirmDialog(null, "<html>Confirma la eliminación de la persona <b>" + getPersonaSeleccionada().getNombres() + "</b>?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                                    personaDelegate = new PersonaDelegate();
                                    AbstractFacade.EM.getTransaction().begin();
                                    personaDelegate.eliminar(getPersonaSeleccionada());
