@@ -35,8 +35,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "RegistroPersona.findById", query = "SELECT r FROM RegistroPersona r WHERE r.id = :id"),
     @NamedQuery(name = "RegistroPersona.findByFecha", query = "SELECT r FROM RegistroPersona r WHERE r.fecha = :fecha"),
     @NamedQuery(name = "RegistroPersona.findByAuto", query = "SELECT r FROM RegistroPersona r WHERE r.auto = :auto"),
-    @NamedQuery(name = "RegistroPersona.findPorPersonaMesyAnno", query = "SELECT r FROM RegistroPersona r "
-        + " WHERE r.idPersona = :idPersona AND FUNC('YEAR', r.fecha) = :anno AND FUNC('MONTH', r.fecha) = :mes and r.idPersona.estado = true"),
+    @NamedQuery(name = "RegistroPersona.findByRangoFechas", query = "SELECT r FROM RegistroPersona r WHERE r.fecha BETWEEN :fechaInicio AND :fechaFin AND r.idPersona = :idPersona"),
+    @NamedQuery(name = "RegistroPersona.findPorPersonaMesyAnno", query = "SELECT r FROM RegistroPersona r  "
+        + " WHERE r.idPersona = :idPersona AND FUNC('YEAR', r.fecha) = :anno AND FUNC('MONTH', r.fecha) = :mes "),
     @NamedQuery(name = "RegistroPersona.findByPersonaActivas", query = "SELECT r FROM RegistroPersona r "
         + " WHERE r.idPersona = :idPersona and r.horaSalida IS NULL and r.idPersona.estado = true"),
     @NamedQuery(name = "RegistroPersona.findByContabilizado", query = "SELECT r FROM RegistroPersona r WHERE r.contabilizado = :contabilizado")})

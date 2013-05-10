@@ -5,27 +5,32 @@
 package com.anjelin.gui.app;
 
 import com.anjelin.gui.table.model.RegistrosPersonaTableModel;
+import com.anjelin.modelo.Persona;
+import com.anjelin.modelo.RegistroPersona;
+import com.anjelin.util.DateUtils;
 import com.toedter.calendar.JDateChooser;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Calendar;
 import java.util.Date;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
  * @author Admon
  */
-class RegistroPersonaPanel extends JPanel {
+class RegistroPersonaPanel extends JPanel implements ActionListener{
 
     private static final Insets insets = new Insets(0, 0, 0, 0);
     private RegistrosPersonaTableModel registrosPersonaTableModel = new RegistrosPersonaTableModel();
@@ -39,22 +44,21 @@ class RegistroPersonaPanel extends JPanel {
     private JTable tablaRegistrosPersona = new JTable();
     private JButton eliminarButton = new JButton("Eliminar");
     private JButton modificarButton = new JButton("modificar");
+    private Date fechaInicio;
+    private Date fechaFin;
+    private static final int COMANDO_BUSCAR = 1;
+    private static final int COMANDO_ELIMINAR = 2 ;
+    private static final int COMANDO_MODIFICAR = 3;
+    private Persona personaSeleccionada;
+    private RegistroPersona registroPersonaSeleccionado;
     
-    public RegistroPersonaPanel() {
-
-
-        //setLayout(new GridBagLayout());
+    public RegistroPersonaPanel(Persona personaSeleccionada) {
+        this.personaSeleccionada = personaSeleccionada;
         setLayout(new GridBagLayout());
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date(System.currentTimeMillis()));
-        int anno = cal.get(Calendar.YEAR);
-        int mes = cal.get(Calendar.MONTH);        
-        cal.set(1, mes, anno);
-        
-        Date _fechaInicio = (Date)cal.getTime().clone();
-        int ultimoDia = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-        cal.set(ultimoDia, mes, anno);
-        Date _fechaFin = (Date)cal.getTime().clone();
+        Date fechaHoy = new Date(System.currentTimeMillis());
+        fechaInicio = DateUtils.getFirstDay(fechaHoy, true);
+        fechaFin = DateUtils.getLastDay(fechaHoy, true);
+
         
         GridBagConstraints cons_fechaInicial = new GridBagConstraints();
         cons_fechaInicial.gridx = 0; // El área de texto empieza en la columna cero.
@@ -62,8 +66,7 @@ class RegistroPersonaPanel extends JPanel {
         cons_fechaInicial.gridwidth = 1; // El área de texto ocupa 1 columna.
         cons_fechaInicial.gridheight = 1; // El área de texto ocupa 1 fila.
         cons_fechaInicial.weightx=1;
-        fechaInicial.setDate(_fechaInicio);
-        System.out.println("Fecha Inicio: "+_fechaInicio);
+        fechaInicial.setDate(fechaInicio);
         cons_fechaInicial.fill = GridBagConstraints.BOTH;
         add(fechaInicial, cons_fechaInicial);
         
@@ -77,8 +80,7 @@ class RegistroPersonaPanel extends JPanel {
         cons_fechaFinal.gridwidth = 1; 
         cons_fechaFinal.gridheight = 1;
         cons_fechaFinal.weightx=1;
-        fechaFinal.setDate(_fechaFin);
-        System.out.println("Fecha Fin: "+_fechaFin);        
+        fechaFinal.setDate(fechaFin);        
         cons_fechaFinal.fill = GridBagConstraints.BOTH;
         add(fechaFinal, cons_fechaFinal); 
         //add(new JTextField(), cons_fechaFinal);    
@@ -128,17 +130,100 @@ class RegistroPersonaPanel extends JPanel {
         tablaRegistrosPersona.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evnt) {
                 if (evnt.getClickCount() > 1) {                    
-                    RegistrosPersonaDialog dialogo = new RegistrosPersonaDialog(null, true);
+                    RegistrosPersonaDialog dialogo = new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true);
                     dialogo.setVisible(true);
                     
                 }
             }
         });
 
-        setBorder(BorderFactory.createLineBorder(Color.black));
+        //setBorder(BorderFactory.createLineBorder(Color.black));
+        
+        //Comando
+        buscar.setActionCommand(String.valueOf(COMANDO_BUSCAR));
+        eliminarButton.setActionCommand(String.valueOf(COMANDO_ELIMINAR));
+        modificarButton.setActionCommand(String.valueOf(COMANDO_MODIFICAR));
+        
+        //listener
+        buscar.addActionListener(this);
+        eliminarButton.addActionListener(this);
+        modificarButton.addActionListener(this);
+        
+        //listener a la tabla
+        tablaRegistrosPersona.getSelectionModel().addListSelectionListener(new RowListener());
+        
+        //tipo de seleccion en el registro
+        tablaRegistrosPersona.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     }
 
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+
+        Integer comando = Integer.parseInt(actionEvent.getActionCommand());
+        switch (comando) {
+            case COMANDO_BUSCAR: {                
+                Date fechaI = fechaInicial.getDate();
+                Date fechaF = fechaFinal.getDate();
+                if(getPersonaSeleccionada() == null || getPersonaSeleccionada().getId() == null){
+                    JOptionPane.showMessageDialog(null, "Debe seleccionar una persona!", "Error!", JOptionPane.ERROR_MESSAGE);
+                    break;                    
+                }else if(fechaI == null){
+                    JOptionPane.showMessageDialog(null, "Debe ingresar una Fecha de Inicio valida", "Error!", JOptionPane.ERROR_MESSAGE);
+                    fechaInicial.requestFocusInWindow();
+                    break;
+                }else if(fechaF == null){
+                    JOptionPane.showMessageDialog(null, "Debe ingresar una Fecha Fin valida", "Error!", JOptionPane.ERROR_MESSAGE);
+                    fechaFinal.requestFocusInWindow();
+                    break;
+                }if(fechaF.before(fechaI)){
+                    JOptionPane.showMessageDialog(null, "La Fecha de Inicio debe ser menor a la Fecha Final", "Error!", JOptionPane.ERROR_MESSAGE);
+                    fechaInicial.requestFocusInWindow();                    
+                }
+                getTablaRegistrosPersona().removeAll();
+                registrosPersonaTableModel.cargarRegistrosPersonaPorRango(personaSeleccionada, DateUtils.truncDate(fechaI), DateUtils.truncDate(fechaF));
+                getTablaRegistrosPersona().setModel(registrosPersonaTableModel);
+                updateUI();
+                break;
+            }
+            case COMANDO_MODIFICAR: {
+
+                break;
+            }
+            case COMANDO_ELIMINAR: {
+
+                break;
+            }
+            default:
+                break;
+        }
+
+    }
+
+    private class RowListener implements ListSelectionListener {
+        public void valueChanged(ListSelectionEvent event) {
+            if (event.getValueIsAdjusting()) {
+                return;
+            }
+            seleccionarRegistroPersona();
+        }
+    }    
+    
+        private void seleccionarRegistroPersona() {
+
+        try {
+            for (int c : tablaRegistrosPersona.getSelectedRows()) {
+                RegistrosPersonaTableModel modelo = (RegistrosPersonaTableModel) tablaRegistrosPersona.getModel();
+                setRegistroPersonaSeleccionado(modelo.getRegistroPersona(c));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+    
     public RegistrosPersonaTableModel getRegistrosPersonaTableModel() {
         return registrosPersonaTableModel;
     }
@@ -201,5 +286,37 @@ class RegistroPersonaPanel extends JPanel {
 
     public void setModificarButton(JButton modificarButton) {
         this.modificarButton = modificarButton;
-    }    
+    }
+
+    public Date getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(Date fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public Date getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(Date fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public Persona getPersonaSeleccionada() {
+        return personaSeleccionada;
+    }
+
+    public void setPersonaSeleccionada(Persona personaSeleccionada) {
+        this.personaSeleccionada = personaSeleccionada;
+    }
+
+    public RegistroPersona getRegistroPersonaSeleccionado() {
+        return registroPersonaSeleccionado;
+    }
+
+    public void setRegistroPersonaSeleccionado(RegistroPersona registroPersonaSeleccionado) {
+        this.registroPersonaSeleccionado = registroPersonaSeleccionado;
+    }
 }

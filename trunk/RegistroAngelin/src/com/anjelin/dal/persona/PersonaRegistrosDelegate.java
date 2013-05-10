@@ -14,8 +14,8 @@ import java.util.Date;
 import java.util.List;
 import com.anjelin.excepciones.EntradasPendientesException;
 import com.anjelin.excepciones.SinEntradasRegistradasException;
+import com.anjelin.util.DateUtils;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  *
@@ -67,7 +67,7 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
             } else if (entradasPendientes.size() == 1) {
                 RegistroPersona registro = entradasPendientes.get(0);
 
-                if (fechasDelMismoDia(registro.getFecha(), hora)) {
+                if (DateUtils.fechasDelMismoDia(registro.getFecha(), hora)) {
                     //Si solo tiene un registro y es del mismo día. Se actauliza la salida 
                     try {
                         EM.getTransaction().begin();
@@ -95,31 +95,6 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         return EM.createNamedQuery("RegistroPersona.findByPersonaActivas", RegistroPersona.class).setParameter("idPersona", persona).getResultList();
     }
 
-    private boolean fechasDelMismoDia(Date fechaBD, Date fechaHoy) {
-
-        try {
-            Calendar calBD = Calendar.getInstance();
-            calBD.setTime(fechaBD);
-            int diaBD = calBD.get(Calendar.DAY_OF_MONTH);
-            int mesBD = calBD.get(Calendar.MONTH);
-            int annoBD = calBD.get(Calendar.YEAR);
-
-            Calendar calHoy = Calendar.getInstance();
-            calHoy.setTime(fechaHoy);
-            int diaHoy = calHoy.get(Calendar.DAY_OF_MONTH);
-            int mesHoy = calHoy.get(Calendar.MONTH);
-            int annoHoy = calHoy.get(Calendar.YEAR);
-
-            if (diaBD == diaHoy && mesBD == mesHoy && annoBD == annoHoy) {
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
     public List<RegistroPersona> registrosPersonaPorMesyAno(Persona persona, int mes, int anno) {
 
         if(persona == null){
@@ -132,4 +107,18 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
                 .setParameter("mes", mes)
                 .getResultList();
     }
+    
+    public List<RegistroPersona> registrosPersonaPorRangoFechas(Persona persona, Date fechaInicio, Date fechaFinal) {
+
+        if(persona == null){
+            return new ArrayList<RegistroPersona>(0);
+        }
+
+        return EM.createNamedQuery("RegistroPersona.findByRangoFechas", RegistroPersona.class)
+                .setParameter("idPersona", persona)
+                .setParameter("fechaInicio", fechaInicio)
+                .setParameter("fechaFin", fechaFinal)
+                .getResultList();
+    }
+    
 }

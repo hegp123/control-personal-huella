@@ -12,6 +12,7 @@ import com.anjelin.gui.table.model.RegistrosPersonaTableModel;
 import com.anjelin.modelo.Persona;
 import com.anjelin.modelo.PersonaHuella;
 import com.anjelin.modelo.PersonaHuellaPK;
+import com.anjelin.util.DateUtils;
 import com.anjelin.util.EnrollmentDialog;
 import com.anjelin.util.MaxLengthTextDocument;
 import com.anjelin.util.StackTraceUtil;
@@ -23,6 +24,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +75,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private final static int COMANDO_CANCELAR = 5;
     private final static int TAMANO_IMAGEN_WIDTH   = 40;
     private final static int TAMANO_IMAGEN_HEIGHT   = 40;
-    private RegistroPersonaPanel regsitroPersonaPanel = new RegistroPersonaPanel();
+    private RegistroPersonaPanel regsitroPersonaPanel = new RegistroPersonaPanel(getPersonaSeleccionada());
     
 
 
@@ -540,9 +542,12 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonEliminar.setEnabled(true);
             botonGuardar.setEnabled(false);
             seleccionarPersona();
+            //CARGA REGISTROS PERSONA SELECCIONADA DEL MES ACTUAL
+            regsitroPersonaPanel.setPersonaSeleccionada(getPersonaSeleccionada());
             regsitroPersonaPanel.getTablaRegistrosPersona().removeAll();
             RegistrosPersonaTableModel registrosPersonaTableModel = regsitroPersonaPanel.getRegistrosPersonaTableModel();
-            registrosPersonaTableModel.cargarDatos(personaSeleccionada, 5, 2013);
+            Date fechaHoy = new Date(System.currentTimeMillis());
+            registrosPersonaTableModel.cargarRegistrosPersonaPorRango(personaSeleccionada, DateUtils.getFirstDay(fechaHoy, true), DateUtils.getLastDay(fechaHoy, true));
             regsitroPersonaPanel.getTablaRegistrosPersona().setModel(registrosPersonaTableModel);
             regsitroPersonaPanel.updateUI();
             activarCampos(true);
