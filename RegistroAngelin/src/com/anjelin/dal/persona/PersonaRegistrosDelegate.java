@@ -120,5 +120,22 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
                 .setParameter("fechaFin", fechaFinal)
                 .getResultList();
     }
+
+    @Override
+    public void eliminar(RegistroPersona entity) throws Exception{
+        try {
+            EM.getTransaction().begin();
+            super.eliminar(entity); //To change body of generated methods, choose Tools | Templates.
+            EM.getTransaction().commit();
+        } catch (Exception e) {
+            if (EM.getTransaction().isActive()) {
+                EM.getTransaction().rollback();
+            }
+            throw e;
+        }
+
+    }
+    
+    
     
 }
