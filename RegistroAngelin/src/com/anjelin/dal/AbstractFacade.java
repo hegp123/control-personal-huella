@@ -59,7 +59,7 @@ public abstract class AbstractFacade<T> {
      *
      * @param entity
      */
-    public void modificar(T entity) {
+    public void modificar(T entity) throws Exception{
         //Object objeto=EM.getReference(Persona.class, ((Persona)entity).getId());
         //((Persona)objeto).setPersonaHuellaList(((Persona)entity).getPersonaHuellaList());
         EM.merge(entity);

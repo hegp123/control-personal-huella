@@ -9,45 +9,57 @@ import com.anjelin.dal.persona.PersonaRegistrosDelegate;
 import com.anjelin.modelo.RegistroPersona;
 import com.anjelin.util.StackTraceUtil;
 import com.toedter.calendar.JDateChooser;
+import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  *
  * @author javrammo
  */
 public class RegistrosPersonaDialog extends JDialog implements ActionListener{
+    public static final String FORMATO_HORA = "HH:mm";
 
     private RegistroPersona registro;
     private JDateChooser fecha = new JDateChooser();
-    private JComboBox horaLlegada;
-    private JComboBox horaSalida = new JComboBox();
-    private JComboBox minutosLlegada = new JComboBox();
-    private JComboBox minutosSalida = new JComboBox();
-    private JComboBox combo_AM_PM_Entrada = new JComboBox(new String[]{"AM", "PM"});
-    private JComboBox combo_AM_PM_Salida = new JComboBox(new String[]{"AM", "PM"});
+    //private JComboBox horaLlegada;
+    //private JComboBox horaSalida = new JComboBox();
+    //private JComboBox minutosLlegada = new JComboBox();
+    //private JComboBox minutosSalida = new JComboBox();
+    //private JComboBox combo_AM_PM_Entrada = new JComboBox(new String[]{"AM", "PM"});
+    //private JComboBox combo_AM_PM_Salida = new JComboBox(new String[]{"AM", "PM"});
+    private JTextFieldDateEditor horaEntrada;
+    private JTextFieldDateEditor horaSalida;
     private JTextArea observaciones = new JTextArea();
     private JButton botonEditar = new JButton("Editar");
     private JButton botonGuardar = new JButton("Guardar");
     private boolean edicion; //true: edicion, false: nuevo registro
     private JButton botonEliminar = new JButton("Eliminar");
+    private JTable tablaRegistrosPersona;
+    
     
 
-    public RegistrosPersonaDialog(RegistroPersona registro, boolean edicion) {
+    public RegistrosPersonaDialog(RegistroPersona registro, boolean edicion, JTable tablaRegistrosPersona) {
         this.registro = registro;
         this.edicion = edicion;
+        this.tablaRegistrosPersona = tablaRegistrosPersona;
 
         setLayout(new BorderLayout(5, 5));
 
@@ -57,30 +69,38 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
 
         JPanel panelHoras = new JPanel(new GridLayout(2, 3));
 
-        Integer[] horas = new Integer[12];
-        for (int i = 0; i < 12; i++) {
-            horas[i] = i + 1;
-        }
-        horaLlegada = new JComboBox(horas);
-        panelHoras.add(crearComponenteConLabelSuperior("Hora LLegada: ", horaLlegada));
-        Integer[] minutos = new Integer[60];
-        for (int i = 0; i < 60; i++) {
-            minutos[i] = i;
-        }
-        minutosLlegada = new JComboBox(minutos);
-        panelHoras.add(crearComponenteConLabelSuperior("Minutos LLegada: ", minutosLlegada));
-        panelHoras.add(crearComponenteConLabelSuperior("", combo_AM_PM_Entrada));
-        horaSalida = new JComboBox(horas);
-        panelHoras.add(crearComponenteConLabelSuperior("Hora Salida: ", horaSalida));
-        minutosSalida = new JComboBox(minutos);
-        panelHoras.add(crearComponenteConLabelSuperior("Minutos LLegada: ", minutosSalida));
-        panelHoras.add(crearComponenteConLabelSuperior("", combo_AM_PM_Salida));
+        //Integer[] horas = new Integer[12];
+        //for (int i = 0; i < 12; i++) {
+        //    horas[i] = i + 1;
+        //}
+        //horaLlegada = new JComboBox(horas);
+        this.horaEntrada = new JTextFieldDateEditor(true, FORMATO_HORA, "##:##",' ');           
+        this.horaEntrada.setToolTipText("Ingrese la hora en formato de 24 horas. Ejemplo 8:00PM = 20:00");
+        this.horaSalida = new JTextFieldDateEditor(true, FORMATO_HORA, "##:##",' ');           
+        this.horaSalida.setToolTipText("Ingrese la hora en formato de 24 horas. Ejemplo 8:00PM = 20:00");        
+        
+        
+        panelHoras.add(crearComponenteConLabelSuperior("**Hora LLegada (HH24:MM): ", horaEntrada));
+        panelHoras.add(crearComponenteConLabelSuperior("Hora Salida (HH24:MM): ", horaSalida));
+        //Integer[] minutos = new Integer[60];
+        //for (int i = 0; i < 60; i++) {
+        //    minutos[i] = i;
+        //}
+        //minutosLlegada = new JComboBox(minutos);
+        //panelHoras.add(crearComponenteConLabelSuperior("Minutos LLegada: ", minutosLlegada));
+        //panelHoras.add(crearComponenteConLabelSuperior("", combo_AM_PM_Entrada));
+        //horaSalida = new JComboBox(horas);
+        //panelHoras.add(crearComponenteConLabelSuperior("Hora Salida: ", horaSalida));
+        //minutosSalida = new JComboBox(minutos);
+        //panelHoras.add(crearComponenteConLabelSuperior("Minutos LLegada: ", minutosSalida));
+        //panelHoras.add(crearComponenteConLabelSuperior("", combo_AM_PM_Salida));
 
-        fechaHoras.add(crearComponenteConLabelSuperior("Fecha:", fecha));
+        fechaHoras.add(crearComponenteConLabelSuperior("**Fecha:", fecha));
         fechaHoras.add(panelHoras);
 
         getContentPane().add(fechaHoras, BorderLayout.NORTH);
-        add(crearComponenteConLabelSuperior("Observaciones:", observaciones), BorderLayout.CENTER);
+        add(crearComponenteConLabelSuperior("**Observaciones:", observaciones), BorderLayout.CENTER);
+        add(new JLabel("** Campos Obligatorios"), BorderLayout.SOUTH);
         observaciones.setRows(4);
 
 
@@ -123,34 +143,15 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
     private void cargarInformacion(RegistroPersona registro) {
         
         fecha.setDate(registro.getFecha());
+        SimpleDateFormat formato = new SimpleDateFormat(FORMATO_HORA);
         if(registro.getHoraEntrada() != null){
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(registro.getHoraEntrada());
-            int hora = cal.get(Calendar.HOUR_OF_DAY);
-            if(hora > 12){
-                horaLlegada.setSelectedItem(hora-12);
-                combo_AM_PM_Entrada.setSelectedItem("PM");
-            }else{
-                horaLlegada.setSelectedItem(hora);
-                combo_AM_PM_Entrada.setSelectedItem("AM");
-            }
-            int minutos = cal.get(Calendar.MINUTE);
-            minutosLlegada.setSelectedItem(minutos);
+            
+            horaEntrada.setText(formato.format(registro.getHoraEntrada()));
+
         }
         
         if(registro.getHoraSalida() != null){
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(registro.getHoraSalida());
-            int hora = cal.get(Calendar.HOUR_OF_DAY);
-            if(hora > 12){
-                horaSalida.setSelectedItem(hora-12);
-                combo_AM_PM_Salida.setSelectedItem("PM");
-            }else{
-                horaSalida.setSelectedItem(hora);
-                combo_AM_PM_Salida.setSelectedItem("AM");
-            }
-            int minutos = cal.get(Calendar.MINUTE);
-            minutosSalida.setSelectedItem(minutos);
+            horaSalida.setText(formato.format(registro.getHoraSalida()));
         }
         
         observaciones.setText(registro.getObservaciones());
@@ -163,8 +164,24 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
         switch (comando) {
             case Constantes.COMANDO_MODIFICAR: {
                 
-                RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistro(), true);
-                dialogo.setVisible(true);
+                if(validacionesRegistro()){
+                    
+                    registro.setFecha(fecha.getDate());
+                    registro.setHoraEntrada(horaEntrada.getDate());
+                    registro.setHoraSalida(horaSalida.getDate());
+                    registro.setObservaciones(observaciones.getText());
+                    registro.setAuto((short)0);
+                    
+                    PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
+                    try {
+                        delegate.modificar(getRegistro());
+                        JOptionPane.showMessageDialog(this, "Registro Modificado con Éxito!!", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                    } catch (Exception ex) {                        
+                        JOptionPane.showMessageDialog(this, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
+                    } 
+                                       
+                }
                 
                 break;
             }
@@ -194,6 +211,24 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
 
     public void setRegistro(RegistroPersona registro) {
         this.registro = registro;
+    }
+
+    private boolean validacionesRegistro() {
+        
+        if(fecha.getDate() == null){
+            JOptionPane.showMessageDialog(this, "Ingrese una Fecha valida", "Error validacion", JOptionPane.ERROR_MESSAGE);
+            fecha.requestFocusInWindow();
+            return false;
+        }else if(horaEntrada.getDate() == null){
+            JOptionPane.showMessageDialog(this, "Ingrese una Hora de Entrada valida", "Error validacion", JOptionPane.ERROR_MESSAGE);
+            horaEntrada.requestFocusInWindow();
+            return false;
+        }else if(observaciones.getText() == null || observaciones.getText().trim().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Ingrese una Observación valida", "Error validacion", JOptionPane.ERROR_MESSAGE);
+            observaciones.requestFocusInWindow();
+            return false;
+        }        
+        return true;
     }
     
     
