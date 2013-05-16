@@ -130,7 +130,7 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
         tablaRegistrosPersona.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evnt) {
                 if (evnt.getClickCount() > 1) {                    
-                    RegistrosPersonaDialog dialogo = new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true);
+                    RegistrosPersonaDialog dialogo = new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true, getTablaRegistrosPersona());
                     dialogo.setVisible(true);
                     
                 }
@@ -189,7 +189,7 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
             }
             case Constantes.COMANDO_MODIFICAR: {
                 
-                RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true);
+                RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true,getTablaRegistrosPersona());
                 dialogo.setVisible(true);
                 
                 break;

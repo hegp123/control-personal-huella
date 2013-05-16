@@ -125,7 +125,7 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
     public void eliminar(RegistroPersona entity) throws Exception{
         try {
             EM.getTransaction().begin();
-            super.eliminar(entity); //To change body of generated methods, choose Tools | Templates.
+            super.eliminar(entity); 
             EM.getTransaction().commit();
         } catch (Exception e) {
             if (EM.getTransaction().isActive()) {
@@ -135,6 +135,22 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         }
 
     }
+
+    @Override
+    public void modificar(RegistroPersona entity) throws Exception{
+        try {
+            EM.getTransaction().begin();
+            super.modificar(entity); 
+            EM.getTransaction().commit();
+        } catch (Exception e) {
+            if (EM.getTransaction().isActive()) {
+                EM.getTransaction().rollback();
+            }
+            throw e;
+        }        
+        
+    }
+    
     
     
     
