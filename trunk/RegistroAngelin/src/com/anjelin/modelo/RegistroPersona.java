@@ -19,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,15 +36,23 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "RegistroPersona.findById", query = "SELECT r FROM RegistroPersona r WHERE r.id = :id"),
     @NamedQuery(name = "RegistroPersona.findByFecha", query = "SELECT r FROM RegistroPersona r WHERE r.fecha = :fecha"),
     @NamedQuery(name = "RegistroPersona.findByAuto", query = "SELECT r FROM RegistroPersona r WHERE r.auto = :auto"),
-    @NamedQuery(name = "RegistroPersona.findByRangoFechas", query = "SELECT r FROM RegistroPersona r WHERE r.fecha BETWEEN :fechaInicio AND :fechaFin AND r.idPersona = :idPersona"),
+    @NamedQuery(name = "RegistroPersona.findByRangoFechas", query = "SELECT r FROM RegistroPersona r WHERE r.fecha BETWEEN :fechaInicio AND :fechaFin AND r.idPersona = :idPersona order by r.fecha, r.horaEntrada"),
     @NamedQuery(name = "RegistroPersona.findPorPersonaMesyAnno", query = "SELECT r FROM RegistroPersona r  "
         + " WHERE r.idPersona = :idPersona AND FUNC('YEAR', r.fecha) = :anno AND FUNC('MONTH', r.fecha) = :mes "),
     @NamedQuery(name = "RegistroPersona.findByPersonaActivas", query = "SELECT r FROM RegistroPersona r "
         + " WHERE r.idPersona = :idPersona and r.horaSalida IS NULL and r.idPersona.estado = true"),
     @NamedQuery(name = "RegistroPersona.findByContabilizado", query = "SELECT r FROM RegistroPersona r WHERE r.contabilizado = :contabilizado")})
 public class RegistroPersona implements Serializable {
+    
+    @TableGenerator(name="RegistroPersonaID_Gen",
+    table="ID_GEN",
+    pkColumnName="GEN_NAME",
+    valueColumnName="GEN_VAL",
+    pkColumnValue="RegistroPersonaID",
+    initialValue=50, allocationSize = 1)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator="RegistroPersonaID_Gen")            
     @Basic(optional = false)
     @Column(nullable = false)
     private Integer id;

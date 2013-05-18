@@ -50,7 +50,7 @@ public abstract class AbstractFacade<T> {
      *
      * @param entity
      */
-    public void crear(T entity) {
+    public void crear(T entity) throws Exception{
         EM.persist(entity);
     }
 

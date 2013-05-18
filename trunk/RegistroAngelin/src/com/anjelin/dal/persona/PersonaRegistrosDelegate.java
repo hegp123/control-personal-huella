@@ -150,6 +150,21 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         }        
         
     }
+
+    @Override
+    public void crear(RegistroPersona entity) throws Exception{
+        try {
+            EM.getTransaction().begin();
+            super.crear(entity);
+            EM.getTransaction().commit();
+        } catch (Exception e) {
+            if (EM.getTransaction().isActive()) {
+                EM.getTransaction().rollback();
+            }
+            throw e;
+        }        
+        
+    }
     
     
     

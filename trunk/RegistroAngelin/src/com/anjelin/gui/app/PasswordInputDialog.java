@@ -4,11 +4,15 @@
  */
 package com.anjelin.gui.app;
 
+import com.anjelin.constantes.Constantes;
+import com.anjelin.util.Encriptar;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -72,9 +76,8 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
  
-        if (OK.equals(cmd)) { //Process the password.           
-            char[] input = passwordField.getPassword();
-            if (isPasswordCorrect(input)) {
+        if (OK.equals(cmd)) { //Process the password.  
+            if (isPasswordCorrect(new String(passwordField.getPassword()))) {
                 add(new JLabel("<html><b>Cargando datos....</b></html>"));
                 validate();
                 SwingUtilities.invokeLater(new Runnable() {
@@ -91,9 +94,6 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
                     JOptionPane.ERROR_MESSAGE);
             }
  
-            //Zero out the possible password, for security.
-            Arrays.fill(input, '0');
- 
             passwordField.selectAll();
             resetFocus();
         } 
@@ -104,19 +104,19 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
      * After this method returns, you should invoke eraseArray
      * on the passed-in array.
      */
-    private static boolean isPasswordCorrect(char[] input) {
+    private static boolean isPasswordCorrect(String password) {
         boolean isCorrect = true;
-        char[] correctPassword = { '1', '2', '3'};
- 
-        if (input.length != correctPassword.length) {
-            isCorrect = false;
-        } else {
-            isCorrect = Arrays.equals (input, correctPassword);
+        String passwordConf = Constantes.getProperties().getProperty("password.md5.crud.personas");
+        String passwordEncrip=null;
+        try {
+            passwordEncrip = Encriptar.encrypt(password, Encriptar.MD5, Encriptar.UT_F8);
+        } catch (Exception ex) {
+            Logger.getLogger(PasswordInputDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
  
-        //Zero out the password.
-        Arrays.fill(correctPassword,'0');
- 
+        if (passwordConf != null && passwordEncrip!=null && passwordEncrip.equals(passwordConf)) {
+            isCorrect = true;
+        }  
         return isCorrect;
     }
  

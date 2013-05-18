@@ -20,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Date;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -47,6 +48,7 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
     private JTable tablaRegistrosPersona = new JTable();
     private JButton eliminarButton = new JButton("Eliminar");
     private JButton modificarButton = new JButton("modificar");
+    private JButton nuevoButton = new JButton("Nuevo");
     private Date fechaInicio;
     private Date fechaFin;
     private Persona personaSeleccionada;
@@ -102,6 +104,7 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
         cons_botonModificar.gridy = 0; 
         cons_botonModificar.gridwidth = 1; 
         cons_botonModificar.gridheight = 1;
+        cons_botonModificar.fill = GridBagConstraints.BOTH;
         add(modificarButton, cons_botonModificar);                        
         //add(new JButton("4"), cons_botonModificar);
         
@@ -123,8 +126,17 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
         cons_botonEliminar.gridy = 1; 
         cons_botonEliminar.gridwidth = 1; 
         cons_botonEliminar.gridheight = 1;
+        cons_botonEliminar.fill = GridBagConstraints.BOTH;
         add(eliminarButton, cons_botonEliminar);         
         //add(new JButton("6"), cons_botonEliminar);
+        
+        GridBagConstraints cons_botonNuevo = new GridBagConstraints();
+        cons_botonNuevo.gridx = 3; 
+        cons_botonNuevo.gridy = 2; 
+        cons_botonNuevo.gridwidth = 1; 
+        cons_botonNuevo.gridheight = 1;
+        cons_botonNuevo.fill = GridBagConstraints.BOTH;
+        add(nuevoButton, cons_botonNuevo);         
 
         
         tablaRegistrosPersona.addMouseListener(new MouseAdapter() {
@@ -143,18 +155,25 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
         buscar.setActionCommand(String.valueOf(Constantes.COMANDO_BUSCAR));
         eliminarButton.setActionCommand(String.valueOf(Constantes.COMANDO_ELIMINAR));
         modificarButton.setActionCommand(String.valueOf(Constantes.COMANDO_MODIFICAR));
+        nuevoButton.setActionCommand(String.valueOf(Constantes.COMANDO_GUARDAR));
         
         //listener
         buscar.addActionListener(this);
         eliminarButton.addActionListener(this);
         modificarButton.addActionListener(this);
-        
+        nuevoButton.addActionListener(this);
         //listener a la tabla
         tablaRegistrosPersona.getSelectionModel().addListSelectionListener(new RowListener());
         
         //tipo de seleccion en el registro
         tablaRegistrosPersona.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        
+        //iconos
+        nuevoButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/new.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+        modificarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+        eliminarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+        buscar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/search.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            
     }
 
 
@@ -177,9 +196,10 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
                     JOptionPane.showMessageDialog(null, "Debe ingresar una Fecha Fin valida", "Error!", JOptionPane.ERROR_MESSAGE);
                     fechaFinal.requestFocusInWindow();
                     break;
-                }if(fechaF.before(fechaI)){
+                }else if(fechaF.before(fechaI)){
                     JOptionPane.showMessageDialog(null, "La Fecha de Inicio debe ser menor a la Fecha Final", "Error!", JOptionPane.ERROR_MESSAGE);
-                    fechaInicial.requestFocusInWindow();                    
+                    fechaInicial.requestFocusInWindow();
+                    break;
                 }
                 getTablaRegistrosPersona().removeAll();
                 registrosPersonaTableModel.cargarRegistrosPersonaPorRango(personaSeleccionada, DateUtils.truncDate(fechaI), DateUtils.truncDate(fechaF));
@@ -187,16 +207,25 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
                 updateUI();
                 break;
             }
-            case Constantes.COMANDO_MODIFICAR: {
+            case Constantes.COMANDO_MODIFICAR : {
                 
-                RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true,getTablaRegistrosPersona());
-                dialogo.setVisible(true);
-                
+                if(getPersonaSeleccionada() == null || getPersonaSeleccionada().getId() == null){
+                    JOptionPane.showMessageDialog(null, "Debe seleccionar una persona!", "Error!", JOptionPane.ERROR_MESSAGE);
+                }else if(getRegistroPersonaSeleccionado() == null || getRegistroPersonaSeleccionado().getId() == null){
+                    JOptionPane.showMessageDialog(null, "Debe seleccionar una Registro de dia de la persona!", "Error!", JOptionPane.ERROR_MESSAGE);
+                }else{
+                    RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), true,getTablaRegistrosPersona());
+                    dialogo.setVisible(true); 
+                }
                 break;
             }
             case Constantes.COMANDO_ELIMINAR: {
                 
-                if (JOptionPane.showConfirmDialog(null, "<html>Confirma la eliminación del registro <b> ID: " + getRegistroPersonaSeleccionado().getId() + "</b> ?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                if(getPersonaSeleccionada() == null || getPersonaSeleccionada().getId() == null){
+                    JOptionPane.showMessageDialog(null, "Debe seleccionar una persona!", "Error!", JOptionPane.ERROR_MESSAGE);
+                }else if(getRegistroPersonaSeleccionado() == null || getRegistroPersonaSeleccionado().getId() == null){
+                    JOptionPane.showMessageDialog(null, "Debe seleccionar una Registro de dia de la persona!", "Error!", JOptionPane.ERROR_MESSAGE);
+                }else if (JOptionPane.showConfirmDialog(null, "<html>Confirma la eliminación del registro <b> ID: " + getRegistroPersonaSeleccionado().getId() + "</b> ?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
                     try {
                         delegate.eliminar(getRegistroPersonaSeleccionado());
@@ -204,8 +233,20 @@ class RegistroPersonaPanel extends JPanel implements ActionListener{
                         JOptionPane.showMessageDialog(null, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
                     }
                 }
-
                 break;
+            }
+            case Constantes.COMANDO_GUARDAR: { 
+                
+                if(getPersonaSeleccionada() == null || getPersonaSeleccionada().getId() == null){
+                    JOptionPane.showMessageDialog(null, "Debe seleccionar una persona!", "Error!", JOptionPane.ERROR_MESSAGE);
+                }else{
+                    RegistrosPersonaDialog dialogo =  new RegistrosPersonaDialog(getRegistroPersonaSeleccionado(), false,getTablaRegistrosPersona());
+                    dialogo.setPersonaSeleccionada(getPersonaSeleccionada());
+                    dialogo.setVisible(true);                    
+                }
+                break;
+                
+
             }
             default:
                 break;
