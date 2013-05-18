@@ -6,6 +6,8 @@ package com.anjelin.gui.app;
 
 import com.anjelin.constantes.Constantes;
 import com.anjelin.dal.persona.PersonaRegistrosDelegate;
+import com.anjelin.gui.table.model.RegistrosPersonaTableModel;
+import com.anjelin.modelo.Persona;
 import com.anjelin.modelo.RegistroPersona;
 import com.anjelin.util.StackTraceUtil;
 import com.toedter.calendar.JDateChooser;
@@ -17,18 +19,16 @@ import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.table.AbstractTableModel;
 
 /**
  *
@@ -53,6 +53,7 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
     private boolean edicion; //true: edicion, false: nuevo registro
     private JButton botonEliminar = new JButton("Eliminar");
     private JTable tablaRegistrosPersona;
+    private Persona personaSeleccionada;
     
     
 
@@ -112,10 +113,14 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
             botonEditar.addActionListener(this);
             botonEliminar.setActionCommand(String.valueOf(Constantes.COMANDO_ELIMINAR));
             botonEliminar.addActionListener(this);
+            botonEditar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonEliminar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+
             getContentPane().add(botones, BorderLayout.SOUTH);
         } else {
             getContentPane().add(botonGuardar, BorderLayout.SOUTH);
             botonGuardar.setActionCommand(String.valueOf(Constantes.COMANDO_GUARDAR));
+            botonGuardar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/save.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
             botonGuardar.addActionListener(this);
         }
         
@@ -177,6 +182,7 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
                         delegate.modificar(getRegistro());
                         JOptionPane.showMessageDialog(this, "Registro Modificado con Éxito!!", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
                         dispose();
+                        ((AbstractTableModel)tablaRegistrosPersona.getModel()).fireTableDataChanged();
                     } catch (Exception ex) {                        
                         JOptionPane.showMessageDialog(this, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
                     } 
@@ -191,6 +197,11 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
                     PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
                     try {
                         delegate.eliminar(getRegistro());
+                        dispose();
+                        //eliminamos el objeto a la lista
+                        RegistrosPersonaTableModel model = (RegistrosPersonaTableModel) tablaRegistrosPersona.getModel();
+                        model.getRegistros().remove(getRegistro());                        
+                        ((AbstractTableModel)tablaRegistrosPersona.getModel()).fireTableDataChanged();
                     } catch (Exception ex) {                        
                         JOptionPane.showMessageDialog(null, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
                     }
@@ -200,17 +211,34 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
             }
             case Constantes.COMANDO_GUARDAR: {
                 
+                if(validacionesRegistro()){
+                    //copiamos la persona
+                    registro = new RegistroPersona();
+                    registro.setFecha(fecha.getDate());
+                    registro.setHoraEntrada(horaEntrada.getDate());
+                    registro.setHoraSalida(horaSalida.getDate());
+                    registro.setObservaciones(observaciones.getText());
+                    registro.setIdPersona(getPersonaSeleccionada());
+                    registro.setAuto((short)0);
+                    
+                    PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
+                    try {
+                        delegate.crear(getRegistro());
+                        JOptionPane.showMessageDialog(this, "Registro Creado con Éxito!!", "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+                        dispose();
+                        //agregamos el nuevo objeto a la lista
+                        RegistrosPersonaTableModel model = (RegistrosPersonaTableModel) tablaRegistrosPersona.getModel();
+                        model.getRegistros().add(registro);
+                        //refrescamos la tabla
+                        ((AbstractTableModel)tablaRegistrosPersona.getModel()).fireTableDataChanged();
+                    } catch (Exception ex) {                        
+                        JOptionPane.showMessageDialog(this, StackTraceUtil.getStackTrace(ex), "Error!", JOptionPane.ERROR_MESSAGE);
+                    } 
+                                       
+                }                
                 break;
             }                
         }
-    }
-
-    public RegistroPersona getRegistro() {
-        return registro;
-    }
-
-    public void setRegistro(RegistroPersona registro) {
-        this.registro = registro;
     }
 
     private boolean validacionesRegistro() {
@@ -230,7 +258,36 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
         }        
         return true;
     }
-    
-    
-    
+
+    public RegistroPersona getRegistro() {
+        return registro;
+    }
+
+    public void setRegistro(RegistroPersona registro) {
+        this.registro = registro;
+    }
+
+    public boolean isEdicion() {
+        return edicion;
+    }
+
+    public void setEdicion(boolean edicion) {
+        this.edicion = edicion;
+    }
+
+    public JTable getTablaRegistrosPersona() {
+        return tablaRegistrosPersona;
+    }
+
+    public void setTablaRegistrosPersona(JTable tablaRegistrosPersona) {
+        this.tablaRegistrosPersona = tablaRegistrosPersona;
+    }
+
+    public Persona getPersonaSeleccionada() {
+        return personaSeleccionada;
+    }
+
+    public void setPersonaSeleccionada(Persona personaSeleccionada) {
+        this.personaSeleccionada = personaSeleccionada;
+    }
 }

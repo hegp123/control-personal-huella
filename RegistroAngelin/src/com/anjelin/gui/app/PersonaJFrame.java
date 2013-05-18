@@ -4,6 +4,7 @@
  */
 package com.anjelin.gui.app;
 
+import com.anjelin.constantes.Constantes;
 import com.anjelin.dal.AbstractFacade;
 import com.anjelin.dal.persona.PersonaDelegate;
 import com.anjelin.dal.persona.PersonaHuellaDelegate;
@@ -70,13 +71,6 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private JButton botonCancelar = new JButton("Cancelar");
     private JButton enrrolarButton = new JButton("Enrrolar...");
     private EnumMap<DPFPFingerIndex, DPFPTemplate> templates = new EnumMap<DPFPFingerIndex, DPFPTemplate>(DPFPFingerIndex.class);
-    private final static int COMANDO_NUEVO = 1;
-    private final static int COMANDO_MODIFICAR = 2;
-    private final static int COMANDO_ELIMINAR = 3;
-    private final static int COMANDO_GUARDAR = 4;
-    private final static int COMANDO_CANCELAR = 5;
-    private final static int TAMANO_IMAGEN_WIDTH   = 40;
-    private final static int TAMANO_IMAGEN_HEIGHT   = 40;
     private RegistroPersonaPanel regsitroPersonaPanel = new RegistroPersonaPanel(getPersonaSeleccionada());
     
 
@@ -162,37 +156,37 @@ public class PersonaJFrame extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new PersonaJFrame().setVisible(true);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(PersonaJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new PersonaJFrame().setVisible(true);
+//            }
+//        });
+//    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
@@ -253,12 +247,12 @@ public class PersonaJFrame extends javax.swing.JFrame {
             botonera.add(botonCancelar); 
             
             //Iconos
-            enrrolarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/finger.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
-            botonCancelar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/cancel.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
-            botonNuevo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/new.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
-            botonModificar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
-            botonEliminar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
-            botonGuardar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/save.png")).getImage().getScaledInstance( TAMANO_IMAGEN_WIDTH, TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            enrrolarButton.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/finger.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonCancelar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/cancel.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonNuevo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/new.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonModificar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonEliminar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
+            botonGuardar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/save.png")).getImage().getScaledInstance( Constantes.TAMANO_IMAGEN_WIDTH, Constantes.TAMANO_IMAGEN_HEIGHT,  java.awt.Image.SCALE_SMOOTH )));
             
             
             
@@ -282,7 +276,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                     Integer comando = Integer.parseInt(actionEvent.getActionCommand());
                     PersonaDelegate personaDelegate = null;
                     switch(comando){
-                        case COMANDO_NUEVO:
+                        case Constantes.COMANDO_NUEVO:
                             activarCampos(true);
                             setPersonaSeleccionada(new Persona());
                             cargarDatosPersonaSeleccionada();
@@ -292,10 +286,11 @@ public class PersonaJFrame extends javax.swing.JFrame {
                             botonEliminar.setEnabled(false);
                             botonGuardar.setEnabled(true);
                             personasjTable.setEnabled(false);
+                            personasTab.setEnabledAt(1, false);
  
                             outputPersonas.append("INGRESE LOS DATOS DE LA NUEVA PERSONA Y LUEGO OPRIMA GUARDAR. DE LO CONTRARIO CANCELAR! \n");
                             break;
-                        case COMANDO_CANCELAR:
+                        case Constantes.COMANDO_CANCELAR:
                             activarCampos(false);
                             setPersonaSeleccionada(new Persona());
                             cargarDatosPersonaSeleccionada();                            
@@ -306,7 +301,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                             botonGuardar.setEnabled(false);                           
                             personasjTable.setEnabled(true);
                             break;
-                        case COMANDO_GUARDAR:                            
+                        case Constantes.COMANDO_GUARDAR:                            
                             try {
                                 personaDelegate = new PersonaDelegate();
 
@@ -354,7 +349,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                             }
                             
                             break;
-                        case COMANDO_MODIFICAR:
+                        case Constantes.COMANDO_MODIFICAR:
                             try {
                                 personaDelegate = new PersonaDelegate();
                                 AbstractFacade.EM.getTransaction().begin();
@@ -411,7 +406,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                             }
                             
                             break;
-                       case COMANDO_ELIMINAR:
+                       case Constantes.COMANDO_ELIMINAR:
                            try {
 
                                if (JOptionPane.showConfirmDialog(null, "<html>Confirma la eliminación de la persona <b>" + getPersonaSeleccionada().getNombres() + "</b>?</html>", "CONFIRMACION", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
@@ -454,15 +449,15 @@ public class PersonaJFrame extends javax.swing.JFrame {
                     
                 }
             };            
-            botonNuevo.setActionCommand(String.valueOf(COMANDO_NUEVO));
+            botonNuevo.setActionCommand(String.valueOf(Constantes.COMANDO_NUEVO));
             botonNuevo.addActionListener(actionListenerBotones);
-            botonModificar.setActionCommand(String.valueOf(COMANDO_MODIFICAR));
+            botonModificar.setActionCommand(String.valueOf(Constantes.COMANDO_MODIFICAR));
             botonModificar.addActionListener(actionListenerBotones);
-            botonEliminar.setActionCommand(String.valueOf(COMANDO_ELIMINAR));
+            botonEliminar.setActionCommand(String.valueOf(Constantes.COMANDO_ELIMINAR));
             botonEliminar.addActionListener(actionListenerBotones);
-            botonGuardar.setActionCommand(String.valueOf(COMANDO_GUARDAR));
+            botonGuardar.setActionCommand(String.valueOf(Constantes.COMANDO_GUARDAR));
             botonGuardar.addActionListener(actionListenerBotones);
-            botonCancelar.setActionCommand(String.valueOf(COMANDO_CANCELAR));
+            botonCancelar.setActionCommand(String.valueOf(Constantes.COMANDO_CANCELAR));
             botonCancelar.addActionListener(actionListenerBotones);
                     
             
@@ -472,6 +467,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
             
             personasTab.addTab("Datos Generales Persona", tabDatos);
             personasTab.addTab("Registros Persona", regsitroPersonaPanel);
+            personasTab.setEnabledAt(1, false);
             
             cargarDatosPersonaSeleccionada();   
     
@@ -500,7 +496,6 @@ public class PersonaJFrame extends javax.swing.JFrame {
         if (getPersonaSeleccionada().getId() != null && listaHuellas != null && !listaHuellas.isEmpty()) {
             //Si se ha seleccionado una persona y tiene huellas registradas
             for (PersonaHuella personaHuella : listaHuellas) {  
-                System.out.println("Cargando... "+ personaHuella);
                 DPFPTemplate template = DPFPGlobal.getTemplateFactory().createTemplate();
                 template.deserialize(personaHuella.getTemplateHuella());
                 this.templates.put(com.anjelin.util.Utilities.enumFromBit(personaHuella.getDedoDigitalpersona().getFingerindex()), template);                
@@ -534,6 +529,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
         direccionCampo.setEnabled(activar);
         salarioCampo.setEnabled(activar);
         estadoCampo.setEnabled(activar);
+        personasTab.setEnabledAt(1, activar);
     }
 
 
@@ -559,6 +555,8 @@ public class PersonaJFrame extends javax.swing.JFrame {
             regsitroPersonaPanel.getTablaRegistrosPersona().setModel(registrosPersonaTableModel);
             regsitroPersonaPanel.updateUI();
             activarCampos(true);
+            //pintamos
+            pack();
         }
     }
     
