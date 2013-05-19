@@ -32,12 +32,11 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         List<RegistroPersona> entradasPendientes = buscarEntradasPendientes(persona);
         Date hora = new Date(System.currentTimeMillis());
 
-        if (tipoRegistro.equals(tipoRegistro.ENTRADA)) {
+        if (tipoRegistro.equals(TipoRegistroEnum.ENTRADA)) {
 
             if (entradasPendientes == null || entradasPendientes.isEmpty()) {
                 //Si no tiene entradas pendientes inserta la entrada
                 try {
-                    EM.getTransaction().begin();
                     RegistroPersona registroEntrada = new RegistroPersona();
                     registroEntrada.setFecha(hora);
                     registroEntrada.setHoraEntrada(hora);
@@ -45,13 +44,9 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
                     registroEntrada.setContabilizado((short) 0);
                     registroEntrada.setIdPersona(persona);
                     registroEntrada.setObservaciones("Registro desde de App.");
-                    crear(registroEntrada);
-                    EM.flush();
-                    EM.getTransaction().commit();
+                    crear(registroEntrada);                    
                 } catch (Exception e) {
-                    if (EM.getTransaction().isActive()) {
-                        EM.getTransaction().rollback();
-                    }
+                    e.printStackTrace();
                 }
 
             } else {
@@ -59,7 +54,7 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
             }
 
 
-        } else if (tipoRegistro.equals(tipoRegistro.SALIDA)) {
+        } else if (tipoRegistro.equals(TipoRegistroEnum.SALIDA)) {
 
             if (entradasPendientes == null || entradasPendientes.isEmpty()) {
                 //Si no enconto registros con una entrada registrada y sin salida
@@ -70,15 +65,10 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
                 if (DateUtils.fechasDelMismoDia(registro.getFecha(), hora)) {
                     //Si solo tiene un registro y es del mismo día. Se actauliza la salida 
                     try {
-                        EM.getTransaction().begin();
                         registro.setHoraSalida(hora);
-                        modificar(registro);
-                        EM.flush();
-                        EM.getTransaction().commit();
+                        modificar(registro);                                               
                     } catch (Exception e) {
-                        if (EM.getTransaction().isActive()) {
-                            EM.getTransaction().rollback();
-                        }
+                        e.printStackTrace();
                     }
                 } else {
                     throw new EntradaPendienteDeSalidaConFechaInvalidaException(registro);
@@ -126,7 +116,8 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         try {
             EM.getTransaction().begin();
             super.eliminar(entity); 
-            EM.getTransaction().commit();
+            EM.flush();
+            EM.getTransaction().commit();            
         } catch (Exception e) {
             if (EM.getTransaction().isActive()) {
                 EM.getTransaction().rollback();
@@ -141,6 +132,7 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         try {
             EM.getTransaction().begin();
             super.modificar(entity); 
+            EM.flush();
             EM.getTransaction().commit();
         } catch (Exception e) {
             if (EM.getTransaction().isActive()) {
@@ -156,6 +148,7 @@ public class PersonaRegistrosDelegate extends AbstractFacade<RegistroPersona> {
         try {
             EM.getTransaction().begin();
             super.crear(entity);
+            EM.flush();
             EM.getTransaction().commit();
         } catch (Exception e) {
             if (EM.getTransaction().isActive()) {

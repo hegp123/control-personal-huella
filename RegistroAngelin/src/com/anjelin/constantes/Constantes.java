@@ -22,6 +22,9 @@ public class Constantes {
     public final static int TAMANO_IMAGEN_WIDTH   = 40;
     public final static int TAMANO_IMAGEN_HEIGHT   = 40; 
     public static final String CONFIG_FILE_NAME="conf.properties";
+    public static boolean FRAME_PERSONAS_ACTIVA=false;
+    public static final String RUTA_BIENVENIDO="sonidos/bienvenido.wav";
+    public static final String RUTA_ADIOS="sonidos/adios.wav";
     
     private static Properties properties = null;
 

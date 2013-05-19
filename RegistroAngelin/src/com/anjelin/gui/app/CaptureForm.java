@@ -1,5 +1,6 @@
 package com.anjelin.gui.app;
 
+import com.anjelin.constantes.Constantes;
 import com.anjelin.dal.persona.PersonaHuellaDelegate;
 import com.anjelin.dal.persona.PersonaRegistrosDelegate;
 import com.anjelin.excepciones.EntradaPendienteDeSalidaConFechaInvalidaException;
@@ -9,6 +10,7 @@ import com.anjelin.modelo.Persona;
 import com.anjelin.modelo.PersonaHuella;
 import com.anjelin.modelo.TipoRegistroEnum;
 import com.anjelin.util.StackTraceUtil;
+import com.anjelin.util.TocarSonido;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -18,14 +20,13 @@ import com.digitalpersona.onetouch.capture.event.*;
 import com.digitalpersona.onetouch.processing.*;
 import com.digitalpersona.onetouch.verification.DPFPVerification;
 import com.digitalpersona.onetouch.verification.DPFPVerificationResult;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CaptureForm  extends JDialog {
 
-    private DPFPCapture capturer = DPFPGlobal.getCaptureFactory().createCapture();
+    private DPFPCapture capturer;
     private JLabel picture = new JLabel();
     private JTextField prompt = new JTextField();
     private JTextArea log = new JTextArea();
@@ -67,6 +68,7 @@ public class CaptureForm  extends JDialog {
         quit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 setVisible(false);
+                dispose();
             }
         });
 
@@ -88,27 +90,48 @@ public class CaptureForm  extends JDialog {
         setLayout(new BorderLayout());
         add(center, BorderLayout.CENTER);
         add(bottom, BorderLayout.PAGE_END);
+        
+        this.addWindowListener(new WindowAdapter() {
 
-        this.addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentShown(ComponentEvent e) {
+            public void windowOpened(WindowEvent e) {
                 init();
-                start();
+                start();                
+                super.windowOpened(e);
             }
 
             @Override
-            public void componentHidden(ComponentEvent e) {
+            public void windowClosed(WindowEvent e) {
                 stop();
+                super.windowClosed(e);
             }
+            
+            
         });
 
+//        this.addComponentListener(new ComponentAdapter() {
+//            @Override
+//            public void componentShown(ComponentEvent e) {
+//                init();
+//                start();
+//            }
+//
+//            @Override
+//            public void componentHidden(ComponentEvent e) {
+//                stop();
+//            }
+//        });        
         pack();
         setLocationRelativeTo(null);
     }
 
 
     protected void init() {
-        
+        System.out.println("Iniciando..........................");
+        capturer = DPFPGlobal.getCaptureFactory().createCapture();
+        System.out.println("Iniciando 1..........................");
+        capturer.setPriority(DPFPCapturePriority.CAPTURE_PRIORITY_LOW);
+        System.out.println("Iniciando 2..........................");
         capturer.addDataListener(new DPFPDataAdapter() {
             @Override
             public void dataAcquired(final DPFPDataEvent e) {
@@ -181,7 +204,7 @@ public class CaptureForm  extends JDialog {
         buscarHuella(sample);
     }
 
-    protected void start() {
+    protected void start() {        
         capturer.startCapture();
         setPrompt("Coloque el dedo en el lector de huellas, para registrar su "+ tipoRegistro.getCadena());
         makeReport("Cargando Huellas desde la BD.... Un momento por favor!");
@@ -189,6 +212,7 @@ public class CaptureForm  extends JDialog {
     }
 
     protected void stop() {
+        System.out.println("Cerrando.........................");
         capturer.stopCapture();
     }
 
@@ -237,8 +261,8 @@ public class CaptureForm  extends JDialog {
                         // Compare the feature set with our template
                         DPFPVerificationResult result =verificator.verify(features, template);
                         if (result.isVerified()) {
-                            validacionesRegistroPersona(personaHuella.getPersona(), tipoRegistro);
-                            makeReport("The fingerprint was VERIFIED.");
+                            validacionesRegistroPersona(personaHuella.getPersona());
+                            makeReport("La huella fue VERIFICADA.");
                             break;
                         }
                     } 
@@ -273,7 +297,7 @@ public class CaptureForm  extends JDialog {
 
     }
 
-    private void validacionesRegistroPersona(Persona persona, TipoRegistroEnum tipoRegistro1) {
+    private void validacionesRegistroPersona(Persona persona) {
         try {
             PersonaRegistrosDelegate delegate = new PersonaRegistrosDelegate();
             delegate.ingresarRegsitroPersona(persona, tipoRegistro);
@@ -281,9 +305,12 @@ public class CaptureForm  extends JDialog {
                 String nombrecompletoPersona = persona.getNombres() + " " + persona.getApellidos();
                 if (tipoRegistro.equals(TipoRegistroEnum.ENTRADA)) {
                     makeReport("Bienvenido: " + nombrecompletoPersona);
+                    cerrarVentana();
                 } else if (tipoRegistro.equals(TipoRegistroEnum.SALIDA)) {
                     makeReport("Adiós: " + nombrecompletoPersona);
+                    cerrarVentana();
                 }
+                tocarSonido();
             }            
         } catch (EntradasPendientesException ex) {
             JOptionPane.showMessageDialog(null, ex.getMensaje(), "Inconsistencia!", JOptionPane.WARNING_MESSAGE);
@@ -295,6 +322,39 @@ public class CaptureForm  extends JDialog {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
         }
         
+    }
+
+    private void cerrarVentana() {
+        try {
+            //Se cierra despues de 2 segundos
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(Long.parseLong(Constantes.getProperties().getProperty("tiempoCierreVentanaCaptura")));
+                        CaptureForm.this.dispose();
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(CaptureForm.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }).start();
+            
+        } catch (Exception e) {
+        }
+    }
+
+    private void tocarSonido() {
+        try {
+            if(tipoRegistro.equals(TipoRegistroEnum.ENTRADA)){
+                new Thread(new TocarSonido(Constantes.RUTA_BIENVENIDO)).start();
+            }
+            else if(tipoRegistro.equals(TipoRegistroEnum.SALIDA)){
+                new Thread(new TocarSonido(Constantes.RUTA_ADIOS)).start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

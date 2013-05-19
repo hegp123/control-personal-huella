@@ -40,7 +40,7 @@ public class EntradasPendientesException extends Exception {
             mensaje = mensaje.concat(new SimpleDateFormat(formatoHora).format(registroPersona.getHoraEntrada()) + "\n");
         }
         
-        mensaje = mensaje.concat("\nComuniquese con su Administrador, para que ingrese los regsitros manualmente.");
+        mensaje = mensaje.concat("\nComuniquese con su Administrador.");
         
         return mensaje;
     }
