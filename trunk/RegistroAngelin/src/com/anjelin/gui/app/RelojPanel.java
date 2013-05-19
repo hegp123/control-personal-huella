@@ -167,9 +167,15 @@ public class RelojPanel extends JPanel implements ActionListener {
     }
     
     private void registroPersona(TipoRegistroEnum tipoRegistro) {
-       
-        CaptureForm form = new CaptureForm(null, tipoRegistro);
-        form.setVisible(true);
+        
+        final TipoRegistroEnum tipoRegistroTemp = tipoRegistro;
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new CaptureForm(null, tipoRegistroTemp).setVisible(true);
+            }
+        });
+        
     } 
     
 }

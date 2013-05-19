@@ -4,6 +4,8 @@
  */
 package com.anjelin.gui.app;
 
+import com.anjelin.constantes.Constantes;
+
 /**
  *
  * @author Admon
@@ -96,9 +98,10 @@ public class AnjelinApp extends javax.swing.JFrame {
 
     private void cutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cutMenuItemActionPerformed
         
-        PasswordInputDialog pass = new PasswordInputDialog();
-        pass.setVisible(true);
-        
+        if(!Constantes.FRAME_PERSONAS_ACTIVA){
+            PasswordInputDialog pass = new PasswordInputDialog();
+            pass.setVisible(true);            
+        }
     }//GEN-LAST:event_cutMenuItemActionPerformed
 
     /**

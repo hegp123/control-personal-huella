@@ -21,10 +21,13 @@ import com.digitalpersona.onetouch.DPFPFingerIndex;
 import com.digitalpersona.onetouch.DPFPGlobal;
 import com.digitalpersona.onetouch.DPFPTemplate;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -46,7 +49,7 @@ import javax.swing.event.ListSelectionListener;
  */
 public class PersonaJFrame extends javax.swing.JFrame {
 
-    private static PersonaJFrame _instance;
+    //private static PersonaJFrame _instance;
     
     private Persona personaSeleccionada = null;
     private JLabel idLabel = new JLabel("Id. Persona :");
@@ -63,7 +66,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private JTextField direccionCampo = new JTextField();
     private JLabel salarioLabel = new JLabel("Salario :");
     private JTextField salarioCampo = new JTextField();    
-    private JCheckBox estadoCampo = new JCheckBox("Activo? ", false);
+    private JCheckBox estadoCampo = new JCheckBox("Activo? ", true);
     private JButton botonNuevo = new JButton("Nuevo");
     private JButton botonModificar = new JButton("Modificar");
     private JButton botonEliminar = new JButton("Eliminar");
@@ -79,7 +82,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
     /**
      * Creates new form PersonaJFrame
      */
-    private PersonaJFrame() {
+    public PersonaJFrame() {
         initComponents();
         PersonaTableModel modelo = new PersonaTableModel();
         personasjTable.setModel(modelo);
@@ -87,6 +90,21 @@ public class PersonaJFrame extends javax.swing.JFrame {
         activarCampos(false);
         pack();
         setLocationRelativeTo(null);
+        
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                super.windowOpened(e);
+                Constantes.FRAME_PERSONAS_ACTIVA = true;
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e); 
+                Constantes.FRAME_PERSONAS_ACTIVA = false;
+            }            
+        });
+        
     }
 
     /**
@@ -196,12 +214,12 @@ public class PersonaJFrame extends javax.swing.JFrame {
     private javax.swing.JTable personasjTable;
     // End of variables declaration//GEN-END:variables
 
-    public static PersonaJFrame getInstance(){        
-        if(_instance == null){
-            _instance = new PersonaJFrame();
-        }
-        return _instance;
-    }
+//    public static PersonaJFrame getInstance(){        
+//        if(_instance == null){
+//            _instance = new PersonaJFrame();
+//        }
+//        return _instance;
+//    }
 
     private void crearTabsPersona() {
         try {
@@ -235,7 +253,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
             
             enrrolarButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) { 
-                    new EnrollmentDialog(PersonaJFrame.this, 2, null, templates).setVisible(true);
+                    new EnrollmentDialog(PersonaJFrame.this, Integer.parseInt(Constantes.getProperties().getProperty("numero.Maximo.registro.huellas")), null, templates).setVisible(true);
                 }
 
             });            
@@ -278,6 +296,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
                     switch(comando){
                         case Constantes.COMANDO_NUEVO:
                             activarCampos(true);
+                            estadoCampo.setSelected(true);
                             setPersonaSeleccionada(new Persona());
                             cargarDatosPersonaSeleccionada();
                             botonCancelar.setVisible(true);
@@ -324,8 +343,11 @@ public class PersonaJFrame extends javax.swing.JFrame {
                                 //Fin template
                                 
                                 AbstractFacade.EM.getTransaction().commit();                               
-                                outputPersonas.append("PERSONA CREADA CON  EXITO!! (ID:"+getPersonaSeleccionada().getId()+")");
+                                Integer idPersona = getPersonaSeleccionada().getId();
+                                outputPersonas.append("PERSONA CREADA CON  EXITO!! (ID:"+idPersona+")");
+                                AbstractFacade.EM.refresh(getPersonaSeleccionada());
                                 ((PersonaTableModel)personasjTable.getModel()).getPersonas().add(getPersonaSeleccionada());
+                                //((PersonaTableModel)personasjTable.getModel()).getPersonas().add(personaDelegate.buscar(idPersona));
                                 personasjTable.updateUI();
                                 
 
@@ -528,7 +550,7 @@ public class PersonaJFrame extends javax.swing.JFrame {
         telefonoCampo.setEnabled(activar);
         direccionCampo.setEnabled(activar);
         salarioCampo.setEnabled(activar);
-        estadoCampo.setEnabled(activar);
+        estadoCampo.setEnabled(activar);        
         personasTab.setEnabledAt(1, activar);
     }
 

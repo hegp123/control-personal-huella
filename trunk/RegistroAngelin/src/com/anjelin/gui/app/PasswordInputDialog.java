@@ -44,7 +44,7 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
         passwordField.setActionCommand(OK);
         passwordField.addActionListener(this);
  
-        label = new JLabel("Enter the password: ");
+        label = new JLabel("Ingrese contraseña: ");
         label.setLabelFor(passwordField);
  
         JPanel buttonPane = createButtonPanel();
@@ -83,7 +83,7 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() { 
-                        PersonaJFrame.getInstance().setVisible(true);
+                        new PersonaJFrame().setVisible(true);
                         PasswordInputDialog.this.dispose();
                     }
                 });
