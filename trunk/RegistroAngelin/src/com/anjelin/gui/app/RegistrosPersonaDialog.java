@@ -152,11 +152,13 @@ public class RegistrosPersonaDialog extends JDialog implements ActionListener{
         if(registro.getHoraEntrada() != null){
             
             horaEntrada.setText(formato.format(registro.getHoraEntrada()));
+            horaEntrada.setDate(registro.getHoraEntrada());
 
         }
         
         if(registro.getHoraSalida() != null){
             horaSalida.setText(formato.format(registro.getHoraSalida()));
+            horaSalida.setDate(registro.getHoraSalida());
         }
         
         observaciones.setText(registro.getObservaciones());

@@ -5,12 +5,14 @@
 package com.anjelin.dal;
 
 import com.anjelin.modelo.Persona;
+import java.sql.Connection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
+import org.eclipse.persistence.sessions.Session;
 
 /**
  * Clase con los metodos basicos para la persistencia de una entidad JPA
@@ -166,4 +168,10 @@ public abstract class AbstractFacade<T> {
         return resultado;
     }
     // PSP_METRICS_METHOD_END
+    
+    public static java.sql.Connection getConnection(){
+        
+        return EM.unwrap(java.sql.Connection.class);
+        
+    }
 }
