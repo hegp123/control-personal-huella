@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportHorasExtras" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Title" forecolor="#FFFFFF" fontName="Times New Roman" fontSize="50" isBold="false" pdfFontName="Times-Bold"/>
+	<style name="SubTitle" forecolor="#CCCCCC" fontName="Times New Roman" fontSize="18" isBold="false" pdfFontName="Times-Roman"/>
+	<style name="Column header" forecolor="#666666" fontName="Times New Roman" fontSize="14" isBold="true" pdfFontName="Times-Roman"/>
+	<style name="Detail" mode="Transparent" fontName="Times New Roman" pdfFontName="Times-Roman"/>
+	<style name="Row" mode="Transparent" fontName="Times New Roman" pdfFontName="Times-Roman">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F0EFEF"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="p_valorHoraExtra" class="java.lang.Double">
+		<defaultValueExpression><![CDATA[2700]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_fechaInicio" class="java.lang.String">
+		<defaultValueExpression><![CDATA["'2013-01-01'"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_fechaFin" class="java.lang.String">
+		<defaultValueExpression><![CDATA["'2013-12-31'"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_idPersona" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[-1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_numeroHorasLaboralesLV" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[9]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_numeroHorasLaboralesS" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[3]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_numeroHorasLaboralesFestivos" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<parameter name="p_horaAlmuerzoLV" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT * FROM (
+
+select *,
+NOMBRE_DIA(DAYOFWEEK(fecha)) dia
+from (
+    select *,
+    CASE WHEN  (horas_trabajadas - ($P{p_numeroHorasLaboralesLV}+$P{p_horaAlmuerzoLV})) > 0 THEN
+    ROUND((horas_trabajadas - ($P{p_numeroHorasLaboralesLV}+$P{p_horaAlmuerzoLV})),2) ELSE 0 END as horas_extras,
+    CASE WHEN  (($P{p_numeroHorasLaboralesLV})- horas_trabajadas) > 0 THEN
+    ROUND((($P{p_numeroHorasLaboralesLV})- horas_trabajadas),2) ELSE 0 END as horas_pendientes,
+    1 as hora_almuerzo
+    from
+     (
+        select
+        p.id, p.nombres, p.apellidos, p.numero_identificacion, rp.fecha,
+        MIN(rp.hora_entrada) HORA_ENTRADA,
+        MAX(rp.hora_salida) HORA_SALIDA,
+        SUM((TIME_TO_SEC(TIMEDIFF(rp.hora_salida, rp.hora_entrada)) / 60) / 60) horas_trabajadas
+        from registros_persona rp
+        inner join personas p on rp.id_persona = p.id
+        group by p.nombres, p.apellidos, p.numero_identificacion, rp.fecha
+
+        ) datos
+        where DAYOFWEEK(fecha) in (2,3,4,5,6) and es_festivo(fecha) <> 1
+) datosLUN_VIE
+
+union
+
+select *,
+NOMBRE_DIA(DAYOFWEEK(fecha)) dia
+from (
+    select *,
+    CASE WHEN  (horas_trabajadas - $P{p_numeroHorasLaboralesS}) > 0 THEN
+    ROUND((horas_trabajadas - $P{p_numeroHorasLaboralesS}),2) ELSE 0 END as horas_extras,
+    CASE WHEN  ($P{p_numeroHorasLaboralesS} - horas_trabajadas) > 0 THEN
+    ROUND(($P{p_numeroHorasLaboralesS} - horas_trabajadas),2) ELSE 0 END as horas_pendientes,
+    0 as hora_almuerzo
+    from
+     (
+        select
+        p.id, p.nombres, p.apellidos, p.numero_identificacion, rp.fecha,
+        MIN(rp.hora_entrada) HORA_ENTRADA,
+        MAX(rp.hora_salida) HORA_SALIDA,
+        /*NO SE RESTA HORA DE ALMUERZO LOS SABADOS*/
+        SUM((TIME_TO_SEC(TIMEDIFF(rp.hora_salida, rp.hora_entrada)) / 60) / 60) horas_trabajadas
+        from registros_persona rp
+        inner join personas p on rp.id_persona = p.id
+        group by p.nombres, p.apellidos, p.numero_identificacion, rp.fecha
+
+        ) datos
+        where DAYOFWEEK(fecha) in (7) AND es_festivo(fecha) <> 1
+) datosSAB
+union
+
+select *,
+concat(NOMBRE_DIA(DAYOFWEEK(fecha)), ' (Festivo)') dia
+from (
+    select *,
+    horas_trabajadas as horas_extras,
+    0 as horas_pendientes,
+    0 as hora_almuerzo
+    from
+     (
+        select
+        p.id, p.nombres, p.apellidos, p.numero_identificacion, rp.fecha,
+        MIN(rp.hora_entrada) HORA_ENTRADA,
+        MAX(rp.hora_salida) HORA_SALIDA,
+        /*NO SE RESTA HORA DE ALMUERZO LOS SABADOS y DOMINGOS*/
+        SUM((TIME_TO_SEC(TIMEDIFF(rp.hora_salida, rp.hora_entrada)) / 60) / 60) horas_trabajadas
+        from registros_persona rp
+        inner join personas p on rp.id_persona = p.id
+        group by p.nombres, p.apellidos, p.numero_identificacion, rp.fecha
+
+        ) datos
+        where DAYOFWEEK(fecha) in (1) OR es_festivo(fecha) = 1
+) datosFESTIVOS
+)
+TOTAL_DATOS
+WHERE ID =$P{p_idPersona}
+and fecha between $P{p_fechaInicio} and $P{p_fechaFin}
+ORDER BY ID, NOMBRES, APELLIDOS, FECHA]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="nombres" class="java.lang.String"/>
+	<field name="apellidos" class="java.lang.String"/>
+	<field name="numero_identificacion" class="java.lang.String"/>
+	<field name="fecha" class="java.sql.Date"/>
+	<field name="HORA_ENTRADA" class="java.sql.Time"/>
+	<field name="HORA_SALIDA" class="java.sql.Time"/>
+	<field name="horas_trabajadas" class="java.math.BigDecimal"/>
+	<field name="horas_extras" class="java.math.BigDecimal"/>
+	<field name="horas_pendientes" class="java.math.BigDecimal"/>
+	<field name="hora_almuerzo" class="java.lang.Integer"/>
+	<field name="dia" class="java.lang.String"/>
+	<variable name="total_horas_extras" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{horas_extras}]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<variable name="total_horas_trabajadas_sin_almuerzo" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{horas_trabajadas}]]></variableExpression>
+	</variable>
+	<variable name="total_horas_pendientes" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{horas_pendientes}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="196" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="797" height="66" backcolor="#000000"/>
+				<staticText>
+					<reportElement style="Title" x="0" y="0" width="370" height="66"/>
+					<box topPadding="4" leftPadding="4" bottomPadding="4" rightPadding="4"/>
+					<textElement verticalAlignment="Bottom">
+						<font size="40" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Muñecos Anjelin]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="SubTitle" x="370" y="37" width="415" height="29"/>
+					<textElement textAlignment="Right">
+						<font size="22" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Detalle Horas Extras]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement mode="Opaque" x="0" y="70" width="797" height="32" forecolor="#000000" backcolor="#CC0000"/>
+				<textField pattern="EEEEE dd MMMMM yyyy">
+					<reportElement x="553" y="12" width="232" height="20" forecolor="#FFFFFF"/>
+					<textElement textAlignment="Right">
+						<font size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement style="Column header" x="15" y="127" width="72" height="18" forecolor="#000000"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Nombres :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="15" y="145" width="72" height="18" forecolor="#000000"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Apellidos :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="Detail" positionType="Float" x="87" y="127" width="283" height="18"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombres}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="Detail" positionType="Float" x="87" y="145" width="283" height="18"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{apellidos}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="Column header" x="15" y="163" width="184" height="18" forecolor="#000000"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Número de Identificación:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="Detail" positionType="Float" x="199" y="163" width="171" height="18"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero_identificacion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="Column header" x="15" y="109" width="72" height="18" forecolor="#000000"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[ID :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="Detail" positionType="Float" x="87" y="109" width="283" height="18"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="Column header" x="406" y="109" width="192" height="20" forecolor="#000000"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Rango de Fechas Generado:]]></text>
+			</staticText>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="598" y="109" width="199" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{p_fechaInicio} + " al " + $P{p_fechaFin}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement style="Column header" x="15" y="0" width="91" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="199" y="0" width="87" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Hora Entrada]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="286" y="0" width="87" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Hora Salida]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="373" y="0" width="100" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Horas de Almuerzo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="573" y="0" width="124" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Horas Extras]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="697" y="0" width="105" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Horas Pendientes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="106" y="0" width="93" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Día]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header" x="473" y="0" width="100" height="18" forecolor="#000000"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Horas Trabajadas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="473" y="10" width="100" height="8"/>
+				<textElement textAlignment="Center">
+					<font size="5" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[(Descontando hora de almuerzo)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<frame>
+				<reportElement style="Row" mode="Opaque" x="0" y="0" width="802" height="18"/>
+				<textField isStretchWithOverflow="true" pattern="MMMMM dd, yyyy">
+					<reportElement style="Detail" positionType="Float" x="15" y="0" width="91" height="18"/>
+					<textElement>
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="h:mm:ss a">
+					<reportElement style="Detail" positionType="Float" x="199" y="0" width="87" height="18"/>
+					<textElement textAlignment="Center">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{HORA_ENTRADA}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="h:mm:ss a">
+					<reportElement style="Detail" positionType="Float" x="286" y="0" width="87" height="18"/>
+					<textElement textAlignment="Center">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{HORA_SALIDA}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00">
+					<reportElement style="Detail" positionType="Float" x="473" y="0" width="100" height="18"/>
+					<textElement textAlignment="Center">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{horas_trabajadas}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00">
+					<reportElement style="Detail" positionType="Float" x="573" y="0" width="124" height="18"/>
+					<textElement textAlignment="Center">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{horas_extras}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" positionType="Float" x="697" y="0" width="105" height="18"/>
+					<textElement textAlignment="Center">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{horas_pendientes}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="Detail" positionType="Float" x="106" y="0" width="93" height="18"/>
+					<textElement>
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{dia}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00">
+					<reportElement style="Detail" positionType="Float" x="373" y="0" width="100" height="18"/>
+					<textElement textAlignment="Center">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{hora_almuerzo}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="6" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="0" width="802" height="4"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="802" height="25" forecolor="#D0B48E" backcolor="#000000"/>
+				<textField evaluationTime="Report">
+					<reportElement style="Column header" x="757" y="3" width="40" height="20" forecolor="#FFFFFF"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Column header" x="677" y="3" width="80" height="20" forecolor="#FFFFFF"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+				</textField>
+				<textField pattern="EEEEE dd MMMMM yyyy">
+					<reportElement style="Column header" x="2" y="3" width="197" height="20" forecolor="#FFFFFF"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="72">
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="136" y="26" width="100" height="20"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_horas_extras}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="16" y="7" width="120" height="20"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Total Horas Trabajadas:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="26" width="120" height="20"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Total Horas Extras:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="16" y="45" width="120" height="20"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Total Horas Pendientes:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="136" y="45" width="100" height="20"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_horas_pendientes}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="136" y="7" width="100" height="20"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_horas_trabajadas_sin_almuerzo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="286" y="7" width="120" height="20"/>
+				<textElement>
+					<font isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Valor Hora Extra:]]></text>
+			</staticText>
+			<textField pattern="¤ #,##0">
+				<reportElement x="406" y="7" width="117" height="20"/>
+				<box leftPadding="5"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{p_valorHoraExtra}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="286" y="41" width="222" height="20"/>
+				<textElement>
+					<font size="14" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Valor a Pagar en horas Extras: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="286" y="61" width="312" height="9"/>
+				<textElement>
+					<font size="7" isBold="false" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[**Horas Extras menos Horas Pendientes, solo si la resta es positiva se cancelan.]]></text>
+			</staticText>
+			<textField pattern="¤ #,##0">
+				<reportElement x="508" y="41" width="192" height="20" forecolor="#FF3333"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($V{total_horas_extras}-$V{total_horas_pendientes}) > 0.0 ? ($V{total_horas_extras}-$V{total_horas_pendientes} * $P{p_valorHoraExtra}) : 0.0]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

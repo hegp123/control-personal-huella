@@ -78,6 +78,7 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
  
         if (OK.equals(cmd)) { //Process the password.  
             if (isPasswordCorrect(new String(passwordField.getPassword()))) {
+                passwordField.setText("");
                 add(new JLabel("<html><b>Cargando datos....</b></html>"));
                 validate();
                 SwingUtilities.invokeLater(new Runnable() {
@@ -105,15 +106,15 @@ public class PasswordInputDialog extends JDialog implements ActionListener {
      * on the passed-in array.
      */
     private static boolean isPasswordCorrect(String password) {
-        boolean isCorrect = true;
+        boolean isCorrect = false;
         String passwordConf = Constantes.getProperties().getProperty("password.md5.crud.personas");
         String passwordEncrip=null;
         try {
-            passwordEncrip = Encriptar.encrypt(password, Encriptar.MD5, Encriptar.UT_F8);
+            passwordEncrip = Encriptar.findMD5(password);
         } catch (Exception ex) {
             Logger.getLogger(PasswordInputDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
- 
+        
         if (passwordConf != null && passwordEncrip!=null && passwordEncrip.equals(passwordConf)) {
             isCorrect = true;
         }  
